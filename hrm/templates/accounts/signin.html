@@ -1,0 +1,124 @@
+{% extends "accounts/base.html" %}
+{% load static %}
+{% block title %}Sign In{% endblock %}
+{% block content %}
+<style>
+    body {
+        background-color: #ffffff; /* White background for the entire page */
+        color: #333333; /* Dark text for readability on white background */
+        font-family: 'Arial', sans-serif;
+    }
+    .signin-container {
+        max-width: 400px;
+        margin: 50px auto;
+        padding: 30px;
+        background-color: #2b0a0a; /* Darker red for card */
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2); /* Slightly lighter shadow for white bg */
+        color: #f5e6e6; /* Light text inside the box */
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        font-weight: bold;
+        color: #ff9999; /* Lighter red for labels */
+    }
+    .form-control {
+        background-color: #3c1414; /* Dark red input background */
+        border: 1px solid #660000; /* Darker red border */
+        color: #f5e6e6;
+        border-radius: 5px;
+        padding: 10px;
+        transition: border-color 0.3s ease;
+    }
+    .form-control:focus {
+        border-color: #cc0000; /* Bright red on focus */
+        box-shadow: 0 0 5px rgba(204, 0, 0, 0.5);
+        outline: none;
+    }
+    .btn-primary {
+        background-color: #cc0000; /* Bright red button */
+        border-color: #cc0000;
+        padding: 12px;
+        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .btn-primary:hover {
+        background-color: #b30000; /* Darker red on hover */
+        border-color: #b30000;
+        transform: translateY(-2px);
+    }
+    .btn-secondary {
+        background-color: #660000; /* Muted red for secondary button */
+        border-color: #660000;
+        padding: 10px 20px;
+        font-size: 14px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .btn-secondary:hover {
+        background-color: #4d0000; /* Darker muted red on hover */
+        border-color: #4d0000;
+        transform: translateY(-2px);
+    }
+    .errorlist {
+        color: #ff6666; /* Bright red for errors */
+        font-size: 14px;
+        margin-top: 5px;
+        list-style: none;
+        padding-left: 0;
+    }
+    .errorlist li {
+        margin-bottom: 5px;
+    }
+    h2 {
+        color: #ff9999; /* Lighter red for heading */
+        font-weight: bold;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    .text-center a {
+        text-decoration: none;
+    }
+    .logo-img {
+        display: block;
+        max-width: 150px; /* Adjust size as needed */
+        height: auto;
+        margin: 0 auto 20px; /* Center and add spacing below */
+        border-radius: 5px; /* Optional: slight rounding for aesthetics */
+    }
+    @media (max-width: 576px) {
+        .signin-container {
+            margin: 20px;
+            padding: 20px;
+        }
+        .logo-img {
+            max-width: 120px; /* Smaller logo on mobile */
+        }
+    }
+</style>
+
+<div class="signin-container">
+    <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo-img">
+    <h2 class="text-center mb-4">HR Sign In</h2>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary w-100">Sign In</button>
+    </form>
+    <div class="text-center mt-3">
+        <a href="{% url 'signup' %}" class="btn btn-secondary btn-signup">Create an Account</a>
+    </div>
+</div>
+{% endblock %}

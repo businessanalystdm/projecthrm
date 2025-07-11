@@ -1,0 +1,28 @@
+<table class="table table-bordered table-sm">
+  <thead>
+    <tr>
+      <th>Sl No.</th>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for asset in assets %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ asset.name }}</td>
+      <td>{{ asset.status|capfirst }}</td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="selectAsset('{{ asset.id }}', '{{ asset.name }}')">Select</button>
+        <button class="btn btn-sm btn-warning" onclick="editAsset('{{ asset.id }}', '{{ asset.name }}', '{{ asset.status }}')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteAsset('{{ asset.id }}')">Delete</button>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="4">No assets found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

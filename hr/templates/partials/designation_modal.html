@@ -1,0 +1,442 @@
+<div class="modal fade" id="designationModal" tabindex="-1" aria-labelledby="designationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="designationModalLabel">Designation Management</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="formFeedback" class="alert alert-dismissible fade show d-none" role="alert">
+                    <span id="feedbackMessage"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <form id="designationForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="designation_id" name="designation_id">
+                    <div class="mb-3">
+                        <label for="designation_name" class="form-label">Designation Name</label>
+                        <input type="text" class="form-control" id="designation_name" name="designation_name" required>
+                        <div id="designationNameFeedback" class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="rank" class="form-label">Rank</label>
+                        <input type="number" class="form-control" id="rank" name="rank" required min="1" value="1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="designation_company_name" class="form-label">Company</label>
+                        <select class="form-select" name="company_name" id="designation_company_name" required>
+                            <option value="" disabled selected class="text-muted">-- Select Company --</option>
+                            {% for company in companies %}
+                            <option value="{{ company.id }}">{{ company.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="designation_department" class="form-label">Department</label>
+                        <select class="form-select" name="department" id="designation_department" required>
+                            <option value="" disabled selected class="text-muted">-- Select Department --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="designation_sub_department" class="form-label">Sub-Department</label>
+                        <select class="form-select" name="sub_department" id="designation_sub_department" required>
+                            <option value="" disabled selected class="text-muted">-- Select Sub-Department --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="designation_category" class="form-label">Category</label>
+                        <select class="form-select" name="category" id="designation_category" required>
+                            <option value="" disabled selected class="text-muted">-- Select Category --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" name="status" id="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Designation</button>
+                </form>
+                <hr>
+                <div id="designationList">
+                    {% include 'partials/designation_list.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        console.log('Designation modal script loaded');
+
+        // Show feedback in the modal
+        function showFeedback(message, type = 'success') {
+            const feedback = document.getElementById('formFeedback');
+            if (feedback) {
+                const feedbackMessage = document.getElementById('feedbackMessage');
+                feedback.classList.remove('alert-success', 'alert-danger', 'alert-info', 'd-none');
+                feedback.classList.add(`alert-${type}`);
+                feedbackMessage.textContent = message;
+                setTimeout(() => feedback.classList.add('d-none'), 5000);
+            }
+        }
+
+        // Show feedback for designation name input
+        function showDesignationNameFeedback(message) {
+            const feedback = document.getElementById('designationNameFeedback');
+            const input = document.getElementById('designation_name');
+            if (feedback && input) {
+                feedback.textContent = message;
+                if (message) {
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            }
+        }
+
+        // Load departments based on company
+        function loadDepartments(companyId) {
+    const deptSelect = document.getElementById('designation_department');
+    const subDeptSelect = document.getElementById('designation_sub_department');
+    const categorySelect = document.getElementById('designation_category');
+
+    if (deptSelect && subDeptSelect && categorySelect) {
+        deptSelect.innerHTML = '<option value="" disabled selected>-- Loading --</option>';
+        subDeptSelect.innerHTML = '<option value="" disabled selected>-- Select Sub-Department --</option>';
+        categorySelect.innerHTML = '<option value="" disabled selected>-- Select Category --</option>';
+
+        fetch(`/department/by-company/${companyId}/`)
+            .then(response => {
+                console.log(`Fetching departments for company ${companyId}: ${response.status}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                return response.json();
+            })
+            .then(data => {
+                deptSelect.innerHTML = '<option value="" disabled selected>-- Select Department --</option>';
+                if (data.success && Array.isArray(data.departments)) {
+                    if (data.departments.length === 0) {
+                        showFeedback('No departments found for this company.', 'warning');
+                    }
+                    data.departments.forEach(dept => {
+                        const option = document.createElement('option');
+                        option.value = dept.id;
+                        option.textContent = dept.department_name;
+                        deptSelect.appendChild(option);
+                    });
+                } else {
+                    showFeedback('Error loading departments.', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading departments:', error);
+                showFeedback('Error loading departments: ' + error.message, 'danger');
+                deptSelect.innerHTML = '<option value="" disabled selected>-- Select Department --</option>';
+            });
+    }
+}
+
+function loadSubDepartments(departmentId) {
+    const subDeptSelect = document.getElementById('designation_sub_department');
+    const categorySelect = document.getElementById('designation_category');
+
+    if (subDeptSelect && categorySelect) {
+        subDeptSelect.innerHTML = '<option value="" disabled selected>-- Loading --</option>';
+        categorySelect.innerHTML = '<option value="" disabled selected>-- Select Category --</option>';
+
+        fetch(`/sub-department/by-department/${departmentId}/`)
+            .then(response => {
+                console.log(`Fetching sub-departments for department ${departmentId}: ${response.status}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                return response.json();
+            })
+            .then(data => {
+                subDeptSelect.innerHTML = '<option value="" disabled selected>-- Select Sub-Department --</option>';
+                if (data.success && Array.isArray(data.subdepartments)) {
+                    if (data.subdepartments.length === 0) {
+                        showFeedback('No sub-departments found for this department.', 'warning');
+                    }
+                    data.subdepartments.forEach(subDept => {
+                        const option = document.createElement('option');
+                        option.value = subDept.id;
+                        option.textContent = subDept.sub_department_name;
+                        subDeptSelect.appendChild(option);
+                    });
+                } else {
+                    showFeedback('Error loading sub-departments.', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading sub-departments:', error);
+                showFeedback('Error loading sub-departments: ' + error.message, 'danger');
+                subDeptSelect.innerHTML = '<option value="" disabled selected>-- Select Sub-Department --</option>';
+            });
+    }
+}
+
+function loadCategories(subDepartmentId) {
+    const categorySelect = document.getElementById('designation_category');
+
+    if (categorySelect) {
+        categorySelect.innerHTML = '<option value="" disabled selected>-- Loading --</option>';
+
+        fetch(`/category/by-subdepartment/${subDepartmentId}/`)
+            .then(response => {
+                console.log(`Fetching categories for sub-department ${subDepartmentId}: ${response.status}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                return response.json();
+            })
+            .then(data => {
+                categorySelect.innerHTML = '<option value="" disabled selected>-- Select Category --</option>';
+                if (data.success && Array.isArray(data.categories)) {
+                    if (data.categories.length === 0) {
+                        showFeedback('No categories found for this sub-department.', 'warning');
+                    }
+                    data.categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.category_name;
+                        categorySelect.appendChild(option);
+                    });
+                } else {
+                    showFeedback('Error loading categories.', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading categories:', error);
+                showFeedback('Error loading categories: ' + error.message, 'danger');
+                categorySelect.innerHTML = '<option value="" disabled selected>-- Select Category --</option>';
+            });
+    }
+}
+
+        // Load designation list dynamically
+        function loadDesignationList() {
+            return fetch("{% url 'designation_list' %}", {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}...`);
+                        });
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    const designationList = document.getElementById("designationList");
+                    if (designationList) {
+                        designationList.innerHTML = html;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading designations:', error);
+                    showFeedback('Failed to load designations: ' + error, 'danger');
+                });
+        }
+
+        // Add or update a designation
+        function submitDesignation() {
+    const form = document.getElementById('designationForm');
+    if (!form) {
+        console.error('Designation form not found');
+        return;
+    }
+
+    const submitButton = form.querySelector('button[type=submit]');
+    const formData = new FormData(form);
+
+    // Log FormData contents for debugging
+    console.log('FormData contents:');
+    for (let [key, value] of formData.entries()) {
+        console.log(`${key}: ${value}`);
+    }
+
+    // Validate required fields
+    const designationName = formData.get('designation_name')?.trim();
+    const rank = formData.get('rank');
+    const companyId = formData.get('company_name');
+    const departmentId = formData.get('department');
+    const subDepartmentId = formData.get('sub_department');
+    const categoryId = formData.get('category');
+    const status = formData.get('status');
+
+    if (!designationName || !rank || !companyId || !departmentId || !subDepartmentId || !categoryId || !status) {
+        showFeedback('Please fill in all required fields.', 'danger');
+        if (!designationName) showDesignationNameFeedback('Designation name is required.');
+        return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = 'Saving...';
+
+    const id = form.getAttribute('data-id');
+    const url = id ? `/designation/update/${id}/` : `/designation/add/`;
+
+    fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCSRFToken() }
+    })
+        .then(response => {
+            console.log('Response status:', response.status); // Debug
+            if (!response.ok) {
+                return response.json().then(err => { throw err; });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Server response:', data); // Debug
+            if (data.success) {
+                showFeedback(`Designation ${id ? 'updated' : 'added'} successfully.`, 'success');
+                form.reset();
+                form.removeAttribute('data-id');
+                submitButton.textContent = 'Add Designation';
+                loadDesignationList();
+            } else {
+                showFeedback(data.error || 'An unexpected error occurred.', 'danger');
+                if (data.error.includes('designation name')) {
+                    showDesignationNameFeedback(data.error);
+                }
+                loadDesignationList();
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            showFeedback('Failed to save designation: ' + (error.error || error.message || 'Unknown error'), 'danger');
+            loadDesignationList();
+        })
+        .finally(() => {
+            submitButton.disabled = false;
+            submitButton.textContent = id ? 'Update Designation' : 'Add Designation';
+        });
+}
+
+        // Get CSRF token
+        function getCSRFToken() {
+    const tokenElement = document.querySelector('[name=csrfmiddlewaretoken]');
+    const token = tokenElement ? tokenElement.value : '';
+    console.log('CSRF Token:', token); // Debug
+    return token;
+}
+
+        // Event Listeners
+        document.addEventListener("DOMContentLoaded", function () {
+            const companySelect = document.getElementById("designation_company_name");
+            const departmentSelect = document.getElementById("designation_department");
+            const subDepartmentSelect = document.getElementById("designation_sub_department");
+            const categorySelect = document.getElementById("designation_category");
+            const designationModal = document.getElementById("designationModal");
+            const designationForm = document.getElementById("designationForm");
+
+            if (companySelect) {
+                companySelect.addEventListener("change", function () {
+                    if (this.value) loadDepartments(this.value);
+                });
+            }
+
+            if (departmentSelect) {
+                departmentSelect.addEventListener("change", function () {
+                    if (this.value) loadSubDepartments(this.value);
+                });
+            }
+
+            if (subDepartmentSelect) {
+                subDepartmentSelect.addEventListener("change", function () {
+                    if (this.value) loadCategories(this.value);
+                });
+            }
+
+            if (designationModal) {
+                designationModal.addEventListener("show.bs.modal", function () {
+                    const form = document.getElementById("designationForm");
+                    if (form) {
+                        form.reset();
+                        form.removeAttribute('data-id');
+                        const submitButton = form.querySelector('button[type=submit]');
+                        if (submitButton) {
+                            submitButton.textContent = 'Add Designation';
+                        }
+                    }
+                    loadDesignationList();
+                });
+            }
+
+            if (designationForm) {
+                designationForm.addEventListener("submit", function (e) {
+                    e.preventDefault();
+                    submitDesignation();
+                });
+            }
+        });
+
+        // Edit and Delete functions
+        window.editDesignation = function(id, name, rank, companyId, departmentId, subDepartmentId, categoryId, status) {
+            const form = document.getElementById("designationForm");
+            if (!form) return;
+
+            form.setAttribute("data-id", id);
+            const submitButton = form.querySelector("button[type=submit]");
+            if (submitButton) {
+                submitButton.textContent = "Update Designation";
+            }
+            document.getElementById("designation_id").value = id;
+            document.getElementById("designation_name").value = name;
+            document.getElementById("rank").value = rank;
+            const companySelect = document.getElementById("designation_company_name");
+            if (companySelect) companySelect.value = companyId;
+            document.getElementById("status").value = status;
+
+            loadDepartments(companyId);
+            setTimeout(() => {
+                const departmentSelect = document.getElementById("designation_department");
+                if (departmentSelect) {
+                    departmentSelect.value = departmentId;
+                    if (departmentId) {
+                        loadSubDepartments(departmentId);
+                        setTimeout(() => {
+                            const subDepartmentSelect = document.getElementById("designation_sub_department");
+                            if (subDepartmentSelect) {
+                                subDepartmentSelect.value = subDepartmentId;
+                                if (subDepartmentId) {
+                                    loadCategories(subDepartmentId);
+                                    setTimeout(() => {
+                                        const categorySelect = document.getElementById("designation_category");
+                                        if (categorySelect) {
+                                            categorySelect.value = categoryId;
+                                        }
+                                    }, 100);
+                                }
+                            }
+                        }, 100);
+                    }
+                }
+            }, 100);
+
+            $('#designationModal').modal('show');
+        };
+
+        window.deleteDesignation = function(id) {
+            if (confirm("Are you sure you want to delete this designation?")) {
+                fetch(`/designation/delete/${id}/`, {
+                    method: "POST",
+                    headers: { "X-CSRFToken": getCSRFToken(), "X-Requested-With": "XMLHttpRequest" }
+                })
+                    .then(res => {
+                        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                        return res.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            loadDesignationList();
+                        } else {
+                            showFeedback("Failed to delete designation: " + (data.error || "Unknown error"), "danger");
+                        }
+                    })
+                    .catch(error => showFeedback("Something went wrong: " + error, "danger"));
+            }
+        };
+    })();
+</script>

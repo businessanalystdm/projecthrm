@@ -1,0 +1,29 @@
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Sl No.</th>
+      <th>Zone Name</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for zone in zones %}
+    <tr>
+      <td>{{forloop.counter}}</td>
+      <td>{{ zone.name }}</td>
+      <td>
+        {% if zone.status == 'active' %}
+        <span class="badge bg-success">Active</span>
+        {% else %}
+        <span class="badge bg-secondary">Inactive</span>
+        {% endif %}
+      </td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="editZone('{{ zone.id }}', '{{ zone.name }}', '{{ zone.status }}')">Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteZone('{{ zone.id }}')">Delete</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

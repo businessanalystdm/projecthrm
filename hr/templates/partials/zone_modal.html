@@ -1,0 +1,92 @@
+<!-- Zone of Operations Modal -->
+<div class="modal fade" id="zoneModal" tabindex="-1" aria-labelledby="zoneModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="zoneModalLabel">Zone of Operations Management</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="zoneForm" data-id="">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="zone_name" class="form-label">Zone Name</label>
+            <input type="text" class="form-control" id="zone_name" name="name" required>
+          </div>
+          <div class="mb-3">
+            <label for="zone_status" class="form-label">Status</label>
+            <select class="form-select" id="zone_status" name="status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Zone</button>
+        </form>
+
+        <hr>
+        <div id="zoneList">{% include 'partials/zone_list.html' %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+function loadZones() {
+    fetch("{% url 'zone_list' %}")
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("zoneList").innerHTML = html;
+        });
+}
+
+document.getElementById("zoneForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const form = this;
+    const id = form.getAttribute("data-id");
+    const url = id ? `/zone/update/${id}/` : `/zone/add/`;
+
+    fetch(url, {
+        method: "POST",
+        headers: { "X-CSRFToken": getCSRFToken() },
+        body: new FormData(form)
+    }).then(res => res.json())
+      .then(data => {
+        if (data.success) {
+            form.reset();
+            form.removeAttribute("data-id");
+            form.querySelector("button[type=submit]").textContent = "Add Zone";
+            loadZones();
+        } else {
+            alert("Failed to save zone.");
+        }
+      });
+});
+
+function editZone(id, name, status) {
+    const form = document.getElementById("zoneForm");
+    form.setAttribute("data-id", id);
+    document.getElementById("zone_name").value = name;
+    document.getElementById("zone_status").value = status;
+    form.querySelector("button[type=submit]").textContent = "Update Zone";
+}
+
+function deleteZone(id) {
+    if (confirm("Delete this zone?")) {
+        fetch(`/zone/delete/${id}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCSRFToken() }
+        }).then(res => res.json())
+          .then(data => {
+              if (data.success) {
+                  loadZones();
+              }
+          });
+    }
+}
+</script>

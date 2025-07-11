@@ -1,0 +1,107 @@
+<div class="modal fade" id="branchesModal" tabindex="-1" aria-labelledby="branchesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="branchesModalLabel">Manage Branches</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="branchesForm" data-id="">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="branch_name" class="form-label">Branch Name</label>
+                        <input type="text" class="form-control" id="branch_name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Branch Code</label>
+                        <input type="text" class="form-control" id="code" name="code" required maxlength="5"
+                               pattern="[A-Z]+" title="Only uppercase letters are allowed"
+                               oninput="this.value = this.value.toUpperCase()">
+                    </div>
+                    <div class="mb-3">
+                        <label for="zone" class="form-label">Zone</label>
+                        <select class="form-select" id="zone" name="zone">
+                            <option value="">Select Zone</option>
+                            {% for zone in zones %}
+                            <option value="{{ zone.id }}">{{ zone.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Branch</button>
+                </form>
+                <hr>
+                <div id="branchesList">{% include 'partials/branches_list.html' %}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    function loadBranches() {
+        fetch("{% url 'branches_list' %}")
+          .then(res => res.text())
+          .then(html => {
+              document.getElementById("branchesList").innerHTML = html;
+          });
+    }
+
+    document.getElementById("branchesForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const form = this;
+        const id = form.getAttribute("data-id");
+        const url = id ? `/branches/update/${id}/` : `/branches/add/`;
+
+        fetch(url, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCSRFToken() },
+            body: new FormData(form)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                form.reset();
+                form.removeAttribute("data-id");
+                form.querySelector("button[type=submit]").textContent = "Add Branch";
+                loadBranches();
+            } else {
+                alert("Error saving branch.");
+            }
+        });
+    });
+
+    function editBranch(id, branchId, name, code, zoneId, status) {
+    const form = document.getElementById("branchesForm");
+    form.setAttribute("data-id", id);
+    document.getElementById("branch_name").value = name;
+    document.getElementById("code").value = code;
+    document.getElementById("zone").value = zoneId;
+    document.getElementById("status").value = status;
+    form.querySelector("button[type=submit]").textContent = "Update Branch";
+}
+
+    function deleteBranch(id) {
+        if (confirm("Delete this branch?")) {
+            fetch(`/branches/delete/${id}/`, {
+                method: "POST",
+                headers: { "X-CSRFToken": getCSRFToken() }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadBranches();
+                }
+            });
+        }
+    }
+</script>

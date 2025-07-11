@@ -1,0 +1,57 @@
+<div class="modal fade" id="employeeHistoryModal" tabindex="-1" aria-labelledby="employeeHistoryModalLabel"
+     aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-light-orange text-dark">
+                <h5 class="modal-title" id="employeeHistoryModalLabel">Employee History</h5>
+                <div class="ms-auto d-flex align-items-center">
+                    <input type="text" class="form-control form-control-sm me-2" id="employeeIdSearch"
+                           placeholder="Search by Employee ID" style="width: 180px;">
+                    <button type="button" class="btn btn-primary btn-sm me-2" id="searchEmployeeBtn">
+                        <i class="bi bi-search"></i> Search
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="clearSearchBtn">
+                        <i class="bi bi-x"></i> Clear
+                    </button>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="employeeHistoryContainer">
+                    <div class="text-center p-3">
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table th, .table td {
+        vertical-align: middle;
+        font-size: 0.9rem;
+    }
+    .table th {
+        background-color: #007bff;
+        color: white;
+    }
+    .table-bordered {
+        border: 1px solid #dee2e6;
+    }
+    .btn-sm {
+        margin-right: 5px;
+    }
+    .modal-header .form-control-sm {
+        height: calc(1.5em + 0.5rem + 2px);
+        font-size: 0.875rem;
+    }
+    .modal-header .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+</style>

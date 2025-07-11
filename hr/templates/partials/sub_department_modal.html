@@ -1,0 +1,290 @@
+<!-- SubDepartment Modal -->
+<div class="modal fade" id="subDepartmentModal" tabindex="-1" aria-labelledby="subDepartmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="subDepartmentModalLabel">Sub-Department Management</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <form id="subDepartmentForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="sub_department_id" name="sub_department_id">
+                    <div class="mb-3">
+                        <label for="sub_department_name" class="form-label">Sub-Department Name</label>
+                        <input type="text" class="form-control" id="sub_department_name" name="sub_department_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="company_name" class="form-label">Company</label>
+                        <select class="form-select" name="company_name" id="company_name" required>
+                            <option value="" disabled selected class="text-muted">-- Select Company --</option>
+                            {% for company in companies %}
+                            <option value="{{ company.id }}">{{ company.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="department" class="form-label">Department</label>
+                        <select class="form-select" name="department" id="department" required>
+                            <option value="" disabled selected class="text-muted">-- Select Department --</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" name="status" id="status" required>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Sub-Department</button>
+                </form>
+                <hr>
+                <div id="subDepartmentList">
+                    {% include 'partials/sub_department_list.html' %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    console.log('Sub-Department modal script loaded');
+
+    function loadDepartments(companyId) {
+        console.log('loadDepartments called with companyId:', companyId);
+        const deptSelect = document.getElementById("department");
+        if (!deptSelect) {
+            console.error('Department select element not found!');
+            return Promise.reject('Department select element not found');
+        }
+
+        deptSelect.innerHTML = '<option value="" disabled selected>-- Loading --</option>';
+
+        return fetch(`/department/by-company/${companyId}/`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'include'
+        })
+            .then(response => {
+                console.log('Fetch response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Fetch response data:', data);
+                deptSelect.innerHTML = '<option value="" disabled selected>-- Select Department --</option>';
+                if (data.success && Array.isArray(data.departments)) {
+                    data.departments.forEach(dept => {
+                        console.log('Adding department:', dept);
+                        const option = document.createElement('option');
+                        option.value = dept.id;
+                        option.textContent = dept.department_name;
+                        deptSelect.appendChild(option);
+                    });
+                    console.log('Final deptSelect HTML:', deptSelect.innerHTML);
+                    if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+                        $(deptSelect).trigger('change.select2');
+                    }
+                } else {
+                    console.error('No departments found or error:', data.error || 'Invalid response');
+                    deptSelect.innerHTML = '<option value="" disabled selected>-- No Departments Available --</option>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading departments:', error);
+                deptSelect.innerHTML = '<option value="" disabled selected>-- Select Department --</option>';
+            });
+    }
+
+    function loadSubDepartmentsByCompanyAndDepartment() {
+        const companyId = document.getElementById("company_name").value || '';
+        const departmentId = document.getElementById("department").value || '';
+        console.log('Loading sub-departments for company:', companyId, 'department:', departmentId);
+
+        let url = "{% url 'sub_department_list' %}";
+        if (companyId || departmentId) {
+            const params = new URLSearchParams();
+            if (companyId) params.append('company_id', companyId);
+            if (departmentId) params.append('department_id', departmentId);
+            url += `?${params.toString()}`;
+        }
+
+        fetch(url, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            credentials: 'include'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById("subDepartmentList").innerHTML = html;
+            })
+            .catch(error => {
+                console.error('SubDepartment: Error loading sub-departments:', error);
+                alert('Failed to load sub-departments.');
+            });
+    }
+
+    function getCSRFToken() {
+        const token = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        if (!token) {
+            console.error('CSRF token not found!');
+        }
+        return token;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log('Sub-Department modal DOMContentLoaded');
+        const companySelect = document.getElementById("company_name");
+        const departmentSelect = document.getElementById("department");
+        const subDepartmentModal = document.getElementById("subDepartmentModal");
+
+        console.log('companySelect:', companySelect);
+        console.log('departmentSelect:', departmentSelect);
+        console.log('subDepartmentModal:', subDepartmentModal);
+
+        if (!companySelect || !departmentSelect || !subDepartmentModal) {
+            console.error('One or more elements not found:', {
+                companySelect, departmentSelect, subDepartmentModal
+            });
+            return;
+        }
+
+        // Use event delegation on the modal to handle company change
+        subDepartmentModal.addEventListener("change", function(event) {
+            if (event.target.id === "company_name") {
+                const companyId = event.target.value;
+                console.log('Selected company ID:', companyId);
+                if (companyId) {
+                    loadDepartments(companyId);
+                } else {
+                    departmentSelect.innerHTML = '<option value="" disabled selected>-- Select Department --</option>';
+                    loadSubDepartmentsByCompanyAndDepartment();
+                }
+            }
+        });
+
+        // Handle Select2 change event if Select2 is used
+        if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+            $(companySelect).on('select2:select', function(e) {
+                const companyId = e.target.value;
+                console.log('Select2 selected company ID:', companyId);
+                if (companyId) {
+                    loadDepartments(companyId);
+                } else {
+                    departmentSelect.innerHTML = '<option value="" disabled selected>-- Select Department --</option>';
+                    loadSubDepartmentsByCompanyAndDepartment();
+                }
+            });
+        }
+
+        departmentSelect.addEventListener("change", function() {
+            console.log('Department changed, updating sub-department list');
+            loadSubDepartmentsByCompanyAndDepartment();
+        });
+
+        subDepartmentModal.addEventListener("show.bs.modal", function() {
+            console.log('Sub-Department modal shown');
+            departmentSelect.innerHTML = '<option value="" disabled selected>-- Select Department --</option>';
+            document.getElementById("subDepartmentForm").reset();
+            document.getElementById("subDepartmentForm").removeAttribute("data-id");
+            document.getElementById("subDepartmentForm").querySelector("button[type=submit]").textContent = "Add Sub-Department";
+            loadSubDepartmentsByCompanyAndDepartment();
+        });
+
+        subDepartmentModal.addEventListener("hidden.bs.modal", function() {
+            console.log('Sub-Department modal hidden');
+            const triggerElement = document.querySelector('[data-bs-target="#subDepartmentModal"]');
+            if (triggerElement) {
+                triggerElement.focus();
+            } else {
+                document.body.focus();
+            }
+        });
+
+        document.getElementById("subDepartmentForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const form = this;
+            const id = form.getAttribute("data-id");
+            const url = id ? `/sub-department/update/${id}/` : `/sub-department/add/`;
+
+            fetch(url, {
+                method: "POST",
+                headers: { "X-CSRFToken": getCSRFToken() },
+                body: new FormData(form)
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        form.reset();
+                        form.removeAttribute("data-id");
+                        form.querySelector("button[type=submit]").textContent = "Add Sub-Department";
+                        loadSubDepartmentsByCompanyAndDepartment();
+                    } else {
+                        alert("Failed to save sub-department: " + (data.error || "Unknown error"));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving sub-department:', error);
+                    alert("Something went wrong.");
+                });
+        });
+    });
+
+    window.editSubDepartment = function(id, name, companyId, departmentId, status) {
+        console.log('editSubDepartment called with:', { id, name, companyId, departmentId, status });
+        const form = document.getElementById("subDepartmentForm");
+        if (!form) {
+            console.error('Sub-Department form not found!');
+            return;
+        }
+        form.setAttribute("data-id", id);
+        form.querySelector("button[type=submit]").textContent = "Update Sub-Department";
+        document.getElementById("sub_department_id").value = id;
+        document.getElementById("sub_department_name").value = name;
+        document.getElementById("company_name").value = companyId;
+        document.getElementById("status").value = status;
+
+        loadDepartments(companyId).then(() => {
+            document.getElementById("department").value = departmentId;
+            loadSubDepartmentsByCompanyAndDepartment();
+        }).catch(error => {
+            console.error('Failed to load departments for edit:', error);
+        });
+
+        $('#subDepartmentModal').modal('show');
+    };
+
+    window.deleteSubDepartment = function(id) {
+        if (confirm("Are you sure you want to delete this sub-department?")) {
+            fetch(`/sub-department/delete/${id}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": getCSRFToken(),
+                    "X-Requested-With": "XMLHttpRequest"
+                }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        loadSubDepartmentsByCompanyAndDepartment();
+                    } else {
+                        alert("Failed to delete sub-department: " + (data.error || "Unknown error"));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting sub-department:', error);
+                    alert("Something went wrong.");
+                });
+        }
+    };
+})();
+</script>

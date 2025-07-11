@@ -1,0 +1,386 @@
+{% load static %}
+<div id="employeeListBox" class="card mt-3" data-list-type="resigned">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Resigned Employees</h5>
+        <div class="d-flex align-items-center gap-2">
+            <label for="employeeIdSearch" class="form-label small">Emp ID</label>
+            <input type="text" class="form-control form-control-sm" id="employeeIdSearch" placeholder="Search by Employee ID..." onkeyup="filterEmployees()">
+            <label for="startDate" class="form-label small">Start</label>
+            <input type="date" class="form-control form-control-sm" id="startDate" onchange="filterEmployees()">
+            <label for="endDate" class="form-label small">End</label>
+            <input type="date" class="form-control form-control-sm" id="endDate" onchange="filterEmployees()">
+            <label for="employeeNameSearch" class="form-label small">Name</label>
+            <input type="text" class="form-control form-control-sm" id="employeeNameSearch" placeholder="Search by name..." onkeyup="filterEmployees()">
+            <button class="btn btn-sm btn-primary" onclick="filterEmployees()">Search</button>
+            <div class="dropdown">
+                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-filter me-1"></i> Filter
+                </button>
+                <div class="dropdown-menu p-3" aria-labelledby="filterDropdown" style="width: 300px;">
+                    <h6 class="dropdown-header">Filter Employees</h6>
+                    <div class="mb-2">
+                        <label for="filterCompany" class="form-label small">Company</label>
+                        <select class="form-select form-select-sm" id="filterCompany">
+                            <option value="">All Companies</option>
+                            {% for company in companies %}
+                            <option value="{{ company.id }}">{{ company.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="filterDepartment" class="form-label small">Department</label>
+                        <select class="form-select form-select-sm" id="filterDepartment">
+                            <option value="">All Departments</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.id }}">{{ dept.department_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="filterSubDepartment" class="form-label small">Sub-Department</label>
+                        <select class="form-select form-select-sm" id="filterSubDepartment">
+                            <option value="">All Sub-Departments</option>
+                            {% for sub_dept in sub_departments %}
+                            <option value="{{ sub_dept.id }}">{{ sub_dept.sub_department_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="filterCategory" class="form-label small">Category</label>
+                        <select class="form-select form-select-sm" id="filterCategory">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="filterDesignation" class="form-label small">Designation</label>
+                        <select class="form-select form-select-sm" id="filterDesignation">
+                            <option value="">All Designations</option>
+                            {% for designation in designations %}
+                            <option value="{{ designation.id }}">{{ designation.designation_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="filterQualification" class="form-label small">Qualification</label>
+                        <select class="form-select form-select-sm" id="filterQualification">
+                            <option value="">All Qualifications</option>
+                            {% for qual in qualifications %}
+                            <option value="{{ qual.id }}">{{ qual.qualification_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="filterZone" class="form-label small">Zone of Operations</label>
+                        <select class="form-select form-select-sm" id="filterZone">
+                            <option value="">All Zones</option>
+                            {% for zone in zones %}
+                            <option value="{{ zone.id }}">{{ zone.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="filterBranch" class="form-label small">Branch</label>
+                        <select class="form-select form-select-sm" id="filterBranch">
+                            <option value="">All Branches</option>
+                            {% for branch in branches %}
+                            <option value="{{ branch.id }}">{{ branch.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button class="btn btn-primary btn-sm w-100 mt-2" onclick="filterEmployees()">Apply Filters</button>
+                </div>
+            </div>
+            <span><button class="btn btn-sm btn-secondary" onclick="resetFilters()">Reset</button></span>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if employees %}
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Sl</th>
+                    <th>Full Name</th>
+                    <th>Employee ID</th>
+                    <th>Company</th>
+                    <th>Branch</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Resignation Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="employeeTableBody">
+                {% for emp in employees %}
+                <tr data-resigning-date="{{ emp.emp_resigning_date|date:'Y-m-d' }}"
+                    data-emp-id-branch="{{ emp.emp_id_branch }}"
+                    data-employee-name="{{ emp.emp_first_name }} {{ emp.emp_last_name }}"
+                    data-employee-id="{{ emp.id }}"
+                    data-company-id="{{ emp.emp_company.id|default_if_none:0 }}"
+                    data-department-id="{{ emp.emp_department.id|default_if_none:0 }}"
+                    data-sub-department-id="{{ emp.emp_sub_department.id|default_if_none:0 }}"
+                    data-category-id="{{ emp.emp_category.id|default_if_none:0 }}"
+                    data-designation-id="{{ emp.emp_designation.id|default_if_none:0 }}"
+                    data-qualification-id="{{ emp.emp_qualification.id|default_if_none:0 }}"
+                    data-zone-id="{{ emp.emp_branch.zone.id|default_if_none:0 }}"
+                    data-branch-id="{{ emp.emp_branch.id|default_if_none:0 }}">
+                    <td class="serial-number">{{ forloop.counter }}</td>
+                    <td>{{ emp.emp_first_name }} {{ emp.emp_last_name }}</td>
+                    <td>{{ emp.emp_id_branch }}</td>
+                    <td>{{ emp.emp_company.company_name|default:"N/A" }}</td>
+                    <td>{{ emp.emp_branch.name|default:"N/A" }}</td>
+                    <td>{{ emp.emp_department.department_name|default:"N/A" }}</td>
+                    <td>{{ emp.emp_designation.designation_name|default:"N/A" }}</td>
+                    <td>{{ emp.emp_resigning_date|date:"Y-m-d"|default:"N/A" }}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#viewEmployeeModal" onclick="loadEmployeeDetails({{ emp.id }})" title="View">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteEmployee({{ emp.id }})" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <nav aria-label="Employee pagination">
+            <ul class="pagination justify-content-center mt-3" id="paginationControls"></ul>
+        </nav>
+        {% else %}
+        <p>No resigned employees found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- View Employee Modal -->
+<div class="modal fade" id="viewEmployeeModal" tabindex="-1" aria-labelledby="viewEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-custom-75 modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="viewEmployeeModalLabel">
+                    <i class="bi bi-person-circle me-2"></i>Employee Details
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="employeeDetailsBody">
+                <p>Loading employee details...</p>
+            </div>
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary btn-sm" id="resignEmployeeBtn" data-employee-id="" disabled>
+                    <i class="bi bi-person-x me-1"></i>Resigned
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-custom-75 { max-width: 75vw; width: 75vw; margin-left: auto; margin-right: auto; }
+    .modal-content { border-radius: 0.5rem; overflow-y: auto; max-height: 80vh; }
+    .modal-body { background-color: #f8f9fa; }
+    .card { border: none; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); }
+    .table { border-radius: 0.25rem; overflow: hidden; }
+    .table-hover tbody tr:hover { background-color: #e9ecef; }
+    .btn-sm { padding: 0.25rem 0.5rem; }
+    @media (max-width: 767.98px) {
+        .modal-custom-75 { max-width: 95vw; width: 95vw; }
+        .modal-content { max-height: 100vh; }
+        .table { font-size: 0.875rem; }
+        .btn-sm { padding: 0.2rem 0.4rem; font-size: 0.75rem; }
+    }
+</style>
+
+<script>
+function filterEmployees() {
+    // Get filter values
+    const empIdSearch = document.getElementById('employeeIdSearch').value.toLowerCase();
+    const empNameSearch = document.getElementById('employeeNameSearch').value.toLowerCase();
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const companyFilter = document.getElementById('filterCompany').value;
+    const departmentFilter = document.getElementById('filterDepartment').value;
+    const subDepartmentFilter = document.getElementById('filterSubDepartment').value;
+    const categoryFilter = document.getElementById('filterCategory').value;
+    const designationFilter = document.getElementById('filterDesignation').value;
+    const qualificationFilter = document.getElementById('filterQualification').value;
+    const zoneFilter = document.getElementById('filterZone').value;
+    const branchFilter = document.getElementById('filterBranch').value;
+
+    // Get all employee rows
+    const rows = document.querySelectorAll('#employeeTableBody tr');
+    let visibleRows = 0;
+
+    // Loop through each row
+    rows.forEach(row => {
+        const resignDate = row.dataset.resigningDate;
+        const empId = row.dataset.empIdBranch.toLowerCase();
+        const empName = row.dataset.employeeName.toLowerCase();
+        const companyId = row.dataset.companyId;
+        const departmentId = row.dataset.departmentId;
+        const subDepartmentId = row.dataset.subDepartmentId;
+        const categoryId = row.dataset.categoryId;
+        const designationId = row.dataset.designationId;
+        const qualificationId = row.dataset.qualificationId;
+        const zoneId = row.dataset.zoneId;
+        const branchId = row.dataset.branchId;
+
+        // Check all filter conditions
+        let showRow = true;
+
+        // Employee ID search
+        if (empIdSearch && !empId.includes(empIdSearch)) {
+            showRow = false;
+        }
+
+        // Employee name search
+        if (empNameSearch && !empName.includes(empNameSearch)) {
+            showRow = false;
+        }
+
+        // Date range filter
+        if (startDate && resignDate < startDate) {
+            showRow = false;
+        }
+        if (endDate && resignDate > endDate) {
+            showRow = false;
+        }
+
+        // Company filter
+        if (companyFilter && companyId !== companyFilter) {
+            showRow = false;
+        }
+
+        // Department filter
+        if (departmentFilter && departmentId !== departmentFilter) {
+            showRow = false;
+        }
+
+        // Sub-Department filter
+        if (subDepartmentFilter && subDepartmentId !== subDepartmentFilter) {
+            showRow = false;
+        }
+
+        // Category filter
+        if (categoryFilter && categoryId !== categoryFilter) {
+            showRow = false;
+        }
+
+        // Designation filter
+        if (designationFilter && designationId !== designationFilter) {
+            showRow = false;
+        }
+
+        // Qualification filter
+        if (qualificationFilter && qualificationId !== qualificationFilter) {
+            showRow = false;
+        }
+
+        // Zone filter
+        if (zoneFilter && zoneId !== zoneFilter) {
+            showRow = false;
+        }
+
+        // Branch filter
+        if (branchFilter && branchId !== branchFilter) {
+            showRow = false;
+        }
+
+        // Show or hide row
+        if (showRow) {
+            row.style.display = '';
+            visibleRows++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Update serial numbers for visible rows
+    const visibleRowsElements = document.querySelectorAll('#employeeTableBody tr:not([style*="display: none"])');
+    visibleRowsElements.forEach((row, index) => {
+        row.querySelector('.serial-number').textContent = index + 1;
+    });
+
+    // Show/hide no results message
+    const noResultsMsg = document.querySelector('.card-body p');
+    if (noResultsMsg) {
+        noResultsMsg.style.display = visibleRows > 0 ? 'none' : 'block';
+    }
+
+    // Update pagination
+    updatePagination(visibleRows);
+}
+
+function resetFilters() {
+    document.getElementById('employeeIdSearch').value = '';
+    document.getElementById('employeeNameSearch').value = '';
+    document.getElementById('startDate').value = '';
+    document.getElementById('endDate').value = '';
+    document.getElementById('filterCompany').value = '';
+    document.getElementById('filterDepartment').value = '';
+    document.getElementById('filterSubDepartment').value = '';
+    document.getElementById('filterCategory').value = '';
+    document.getElementById('filterDesignation').value = '';
+    document.getElementById('filterQualification').value = '';
+    document.getElementById('filterZone').value = '';
+    document.getElementById('filterBranch').value = '';
+    filterEmployees();
+}
+
+function updatePagination(visibleRows) {
+    const paginationControls = document.getElementById('paginationControls');
+    paginationControls.innerHTML = ''; // Clear existing controls
+    if (visibleRows > 0) {
+        // Add pagination items as needed (customize based on your pagination logic)
+    }
+}
+
+function loadEmployeeDetails(employeeId) {
+    console.log('Loading details for employee ID:', employeeId);
+    const $body = $('#employeeDetailsBody');
+    $body.html('<p>Loading employee details...</p>');
+    $.ajax({
+        url: `/get_employee_details/?id=${employeeId}`,
+        type: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success: function(data) {
+            $body.html(data);
+            $('#resignEmployeeBtn').attr('data-employee-id', employeeId);
+            // Keep resign button disabled for resigned employees
+            $('#resignEmployeeBtn').prop('disabled', true).addClass('btn-secondary').removeClass('btn-danger').text('Resigned');
+        },
+        error: function(xhr) {
+            console.error('Error loading employee details:', xhr.status, xhr.statusText);
+            $body.html('<p class="text-danger">Failed to load employee details.</p>');
+        }
+    });
+}
+
+function deleteEmployee(employeeId) {
+    if (confirm('Are you sure you want to delete this employee?')) {
+        console.log('Deleting employee ID:', employeeId);
+        $.ajax({
+            url: `/employee/delete/${employeeId}/`,
+            type: 'POST',
+            data: { csrfmiddlewaretoken: $('[name=csrfmiddlewaretoken]').val() },
+            success: function(data) {
+                if (data.success) {
+                    alert('Employee deleted successfully.');
+                    location.reload(); // Refresh the list
+                } else {
+                    alert('Error deleting employee: ' + data.error);
+                }
+            },
+            error: function(xhr) {
+                console.error('Error deleting employee:', xhr.status, xhr.statusText);
+                alert('Failed to delete employee.');
+            }
+        });
+    }
+}
+</script>

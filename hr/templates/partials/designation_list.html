@@ -1,0 +1,37 @@
+  <table class="table table-bordered">
+      <thead>
+          <tr>
+              <th>Sl No.</th>
+              <th>Name</th>
+              <th>Company</th>
+              <th>Department</th>
+              <th>Sub-Department</th>
+              <th>Category</th>
+              <th>Status</th>
+              <th>Actions</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for d in designations %}
+          <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ d.designation_name }}</td>
+              <td>{{ d.category.sub_department.department.company_name.company_name }}</td>
+              <td>{{ d.category.sub_department.department.department_name }}</td>
+              <td>{{ d.category.sub_department.sub_department_name }}</td>
+              <td>{{ d.category.category_name }}</td>
+              <td>
+                  {% if d.status == 'active' %}
+                      <span class="badge bg-success">Active</span>
+                  {% else %}
+                      <span class="badge bg-secondary">Inactive</span>
+                  {% endif %}
+              </td>
+              <td>
+                  <button class="btn btn-sm btn-primary" onclick="editDesignation('{{ d.id }}', '{{ d.designation_name|escapejs }}', '{{ d.rank }}', '{{ d.category.sub_department.department.company_name.id }}', '{{ d.category.sub_department.department.id }}', '{{ d.category.sub_department.id }}', '{{ d.category.id }}', '{{ d.status }}')">Edit</button>
+                  <button class="btn btn-sm btn-danger" onclick="deleteDesignation('{{ d.id }}')">Delete</button>
+              </td>
+          </tr>
+          {% endfor %}
+      </tbody>
+  </table>

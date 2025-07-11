@@ -1,0 +1,33 @@
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Sl No.</th>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    {% for qual in qualifications %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ qual.qualification_name }}</td>
+      <td>
+        {% if qual.status == 'active' %}
+          <span class="badge bg-success">Active</span>
+        {% else %}
+          <span class="badge bg-secondary">Inactive</span>
+        {% endif %}
+      </td>
+      <td>
+        <button class="btn btn-sm btn-primary"
+            onclick="editQualification('{{ qual.id }}', '{{ qual.qualification_name }}', '{{ qual.status }}')">
+            Edit
+        </button>
+        <button class="btn btn-sm btn-danger" onclick="deleteQualification('{{ qual.id }}')">Delete</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

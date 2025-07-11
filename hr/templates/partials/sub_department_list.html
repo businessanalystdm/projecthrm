@@ -1,0 +1,44 @@
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>Sl No.</th>
+            <th>Sub-Department</th>
+            <th>Department</th>
+            <th>Company</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sub in subdepartments %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ sub.sub_department_name }}</td>
+            <td>{{ sub.department.department_name }}</td>
+            <td>{{ sub.department.company_name.company_name }}</td>
+            <td>
+                {% if sub.status == 'active' %}
+                    <span class="badge bg-success">Active</span>
+                {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+            </td>
+            <td>
+                <button class="btn btn-sm btn-warning" onclick="editSubDepartment(
+                    '{{ sub.id }}',
+                    '{{ sub.sub_department_name }}',
+                    '{{ sub.department.company_name.id }}',
+                    '{{ sub.department.id }}',
+                    '{{ sub.status }}'
+                )">Edit</button>
+
+                <button class="btn btn-sm btn-danger" onclick="deleteSubDepartment('{{ sub.id }}')">Delete</button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center text-muted">No sub-departments found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

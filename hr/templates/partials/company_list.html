@@ -1,0 +1,56 @@
+<style>
+    div#companyNameList table.table.table-bordered.table-hover thead tr,
+    div#companyNameList table.table.table-bordered.table-hover thead tr.table-primary,
+    div#companyNameList table.table.table-bordered.table-hover thead tr[style] {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+    div#companyNameList table.table.table-bordered.table-hover thead tr th {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+</style>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Sl No.</th>
+            <th scope="col">Company Name</th>
+            <th scope="col">Status</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for company in companies %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ company.company_name }}</td>
+            <td>
+                {% if company.status == 'active' %}
+                    <span class="badge bg-success">Active</span>
+                {% elif company.status == 'inactive' %}
+                    <span class="badge bg-secondary">Inactive</span>
+                {% elif company.status == 'pending' %}
+                    <span class="badge bg-warning">Pending</span>
+                {% endif %}
+            </td>
+            <td>
+                <button class="btn btn-warning btn-sm"
+                        onclick="editCompanyName({{ company.id }}, '{{ company.company_name|escapejs }}', '{{ company.status|escapejs }}')"
+                        title="Edit {{ company.company_name }}">
+                    Edit
+                </button>
+                <button class="btn btn-danger btn-sm"
+                        onclick="deleteCompanyName({{ company.id }})"
+                        title="Delete {{ company.company_name }}">
+                    Delete
+                </button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center">No companies found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

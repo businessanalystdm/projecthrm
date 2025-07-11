@@ -1,0 +1,21 @@
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
+       data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-envelope"></i>
+    </a>
+    <div class="dropdown-menu messages-dropdown dropdown-menu-end"
+         aria-labelledby="messagesDropdown">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message-item {% if message.type == 'birthday' %}birthday-message{% else %}anniversary-message{% endif %}">
+                    <p class="mb-1">{{ message.content }}</p>
+                    <small class="text-muted">{{ message.time }}</small>
+                </div>
+            {% empty %}
+                <div class="no-messages">No birthdays or anniversaries today</div>
+            {% endfor %}
+        {% else %}
+            <div class="no-messages">No birthdays or anniversaries today</div>
+        {% endif %}
+    </div>
+</li>

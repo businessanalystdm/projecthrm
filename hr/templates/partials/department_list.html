@@ -1,0 +1,56 @@
+<style>
+    div#departmentList table.table.table-bordered.table-hover thead.table-light tr,
+    div#departmentList table.table.table-bordered.table-hover thead.table-light tr.table-primary,
+    div#departmentList table.table.table-bordered.table-hover thead.table-light tr[style] {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+    div#departmentList table.table.table-bordered.table-hover thead.table-light tr th {
+        background-color: #007bff !important;
+        color: white !important;
+    }
+</style>
+
+<div id="departmentList">
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+        <tr>
+            <th>Sl No.</th>
+            <th>Department</th>
+            <th>Company</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for dept in departments %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ dept.department_name }}</td>
+            <td>{{ dept.company_name.company_name }}</td>
+            <td>
+                {% if dept.status == 'active' %}
+                <span class="badge bg-success">Active</span>
+                {% else %}
+                <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+            </td>
+            <td>
+                <button class="btn btn-sm btn-warning" onclick="editDepartment(
+        '{{ dept.id }}',
+        '{{ dept.department_name|escapejs }}',
+        '{{ dept.company_name.id }}',
+        '{{ dept.status|escapejs }}'
+    )">Edit
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteDepartment('{{ dept.id }}')">Delete</button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5" class="text-center text-muted">No departments found.</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

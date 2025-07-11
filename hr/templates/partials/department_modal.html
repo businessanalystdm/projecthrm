@@ -1,0 +1,147 @@
+<!-- Department Modal -->
+<div class="modal fade" id="departmentModal" tabindex="-1" aria-labelledby="departmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="departmentModalLabel">Department Management</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Form -->
+                <form id="departmentForm" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="department_name" class="form-label">Department Name</label>
+                        <input type="text" class="form-control" id="department_name" name="department_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="company_name" class="form-label">Company</label>
+                        <select class="form-select" id="company_name" name="company_name" required>
+                            <option value="">Select Company</option>
+                            {% for company in companies %}
+                            <option value="{{ company.id }}">{{ company.company_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Department</button>
+                </form>
+
+                <hr>
+
+                <!-- Department List -->
+                <div id="departmentList">
+                    {% include 'partials/department_list.html' %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Department Script -->
+<script>
+    function getCSRFToken() {
+      return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+
+    // Load department list dynamically
+function loadDepartmentList() {
+  const url = "{% url 'department_list' %}";
+  console.log('Fetching department list from:', url);
+  fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(html => {
+      document.getElementById("departmentList").innerHTML = html;
+    })
+    .catch(error => {
+      console.error('Error loading department list:', error);
+      alert(`Failed to load department list: ${error.message}`);
+    });
+}
+
+    // Remove the company select change listener since it's not needed for department list
+    // If you need to filter departments by company, add it later with proper logic
+
+    document.getElementById("departmentForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const form = this;
+      const id = form.getAttribute("data-id");
+      const url = id ? `/department/update/${id}/` : `/department/add/`;
+
+      fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken()
+        },
+        body: new FormData(form)
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            form.reset();
+            form.removeAttribute("data-id");
+            form.querySelector("button[type=submit]").textContent = "Add Department";
+            loadDepartmentList(); // Refresh the department list
+          } else {
+            alert("Failed to save department: " + (data.error || "Check input or try again."));
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          alert("Something went wrong.");
+        });
+    });
+
+    function editDepartment(id, name, companyId, status) {
+      const form = document.getElementById("departmentForm");
+      form.setAttribute("data-id", id);
+      document.getElementById("department_name").value = name;
+      document.getElementById("company_name").value = companyId;
+      document.getElementById("status").value = status;
+      form.querySelector("button[type=submit]").textContent = "Update Department";
+    }
+
+    function deleteDepartment(id) {
+      if (confirm("Delete this department?")) {
+        fetch(`/department/delete/${id}/`, {
+          method: "POST",
+          headers: {
+            "X-CSRFToken": getCSRFToken()
+          }
+        }).then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              loadDepartmentList(); // Refresh the department list
+            } else {
+              alert("Failed to delete department.");
+            }
+          })
+          .catch(error => {
+            console.error("Error:", error);
+            alert("Something went wrong.");
+          });
+      }
+    }
+
+    // Load department list when the modal is shown
+    document.getElementById("departmentModal").addEventListener("show.bs.modal", function () {
+  loadDepartmentList();
+});
+</script>

@@ -1,0 +1,467 @@
+{% load static %}
+<!-- Add/Edit Employee Modal -->
+<div class="modal fade" id="addEditEmployeeModal" tabindex="-1" aria-labelledby="addEditEmployeeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addEditEmployeeModalLabel">
+                    <i class="bi bi-person-plus me-2"></i><span class="modal-title-text">Add Employee</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="employeeForm" method="POST" action="/add_employee/" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" id="employeeId" name="employee_id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empIdBranch" class="form-label">Employee ID (7 digits)</label>
+                            <input type="text" class="form-control" id="empIdBranch" name="emp_id_branch" pattern="\d{7}" required>
+                            <div class="invalid-feedback">Employee ID must be exactly 7 digits.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empFirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="empFirstName" name="emp_first_name" required>
+                            <div class="invalid-feedback">Please enter the first name.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empLastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="empLastName" name="emp_last_name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empAadharNumber" class="form-label">Aadhar Number</label>
+                            <input type="text" class="form-control" id="empAadharNumber" name="emp_aadhar_number" pattern="\d{12}">
+                            <div class="invalid-feedback">Aadhar number must be 12 digits.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empDob" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="empDob" name="emp_dob" required>
+                            <div class="invalid-feedback">Please select a date of birth.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empGender" class="form-label">Gender</label>
+                            <select class="form-select" id="empGender" name="emp_gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a gender.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empMobile" class="form-label">Mobile Number</label>
+                            <input type="tel" class="form-control" id="empMobile" name="emp_mobile" pattern="\+?\d{10,15}" required>
+                            <div class="invalid-feedback">Mobile number must be 10-15 digits.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empSecondMobile" class="form-label">Secondary Mobile</label>
+                            <input type="tel" class="form-control" id="empSecondMobile" name="emp_second_mobile" pattern="\+?\d{10,15}">
+                            <div class="invalid-feedback">Secondary mobile must be 10-15 digits if provided.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="empEmail" name="emp_email" required>
+                            <div class="invalid-feedback">Please enter a valid email address.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empBloodGroup" class="form-label">Blood Group</label>
+                            <select class="form-select" id="empBloodGroup" name="emp_blood_group">
+                                <option value="">Select Blood Group</option>
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empQualification" class="form-label">Qualification</label>
+                            <select class="form-select" id="empQualification" name="emp_qualification" required>
+                                <option value="">Select Qualification</option>
+                                {% for qual in qualifications %}
+                                <option value="{{ qual.id }}">{{ qual.qualification_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a qualification.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empAddress" class="form-label">Address</label>
+                            <textarea class="form-control" id="empAddress" name="emp_address" required></textarea>
+                            <div class="invalid-feedback">Please enter an address.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empCompany" class="form-label">Company</label>
+                            <select class="form-select" id="empCompany" name="emp_company" required>
+                                <option value="">Select Company</option>
+                                {% for company in companies %}
+                                <option value="{{ company.id }}">{{ company.company_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a company.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empBranch" class="form-label">Branch</label>
+                            <select class="form-select" id="empBranch" name="emp_branch" required>
+                                <option value="">Select Branch</option>
+                                {% for branch in branches %}
+                                <option value="{{ branch.id }}">{{ branch.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a branch.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empDepartment" class="form-label">Department</label>
+                            <select class="form-select" id="empDepartment" name="emp_department" required>
+                                <option value="">Select Department</option>
+                                {% for dept in departments %}
+                                <option value="{{ dept.id }}">{{ dept.department_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a department.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empSubDepartment" class="form-label">Sub-Department</label>
+                            <select class="form-select" id="empSubDepartment" name="emp_sub_department" required>
+                                <option value="">Select Sub-Department</option>
+                                {% for sub_dept in sub_departments %}
+                                <option value="{{ sub_dept.id }}">{{ sub_dept.sub_department_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a sub-department.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empCategory" class="form-label">Category</label>
+                            <select class="form-select" id="empCategory" name="emp_category" required>
+                                <option value="">Select Category</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.category_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please select a category.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empDesignation" class="form-label">Designation</label>
+                            <select class="form-select" id="empDesignation" name="emp_designation" required>
+                                <option value="">Select Designation</option>
+                                {% for designation in designations %}
+                                <option value="{{ designation.id }}">{{ designation.designation_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class recursion="Please select a designation.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empSalary" class="form-label">Salary</label>
+                            <input type="number" class="form-control" id="empSalary" name="emp_salary" step="0.01" min="0" required>
+                            <div class="invalid-feedback">Please enter a valid salary.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empJoiningDate" class="form-label">Joining Date</label>
+                            <input type="date" class="form-control" id="empJoiningDate" name="emp_joining_date" required>
+                            <div class="invalid-feedback">Please select a joining date.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empResigningDate" class="form-label">Resigning Date</label>
+                            <input type="date" class="form-control" id="empResigningDate" name="emp_resigning_date">
+                            <div class="invalid-feedback">Please select a valid resigning date.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empStatus" class="form-label">Status</label>
+                            <select class="form-select" id="empStatus" name="emp_status" required>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a status.</div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="empWorkStartTime" class="form-label">Work Start Time</label>
+                            <input type="time" class="form-control" id="empWorkStartTime" name="emp_work_start_time" required>
+                            <div class="invalid-feedback">Please select a start time.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="empWorkEndTime" class="form-label">Work End Time</label>
+                            <input type="time" class="form-control" id="empWorkEndTime" name="emp_work_end_time" required>
+                            <div class="invalid-feedback">Please select an end time.</div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="empSkills" class="form-label">Skills</label>
+                        <select class="form-select" id="empSkills" name="emp_extra_skills" multiple required>
+                            <!-- Populated dynamically via AJAX -->
+                        </select>
+                        <div class="invalid-feedback">Please select at least one skill.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="empExperiences" class="form-label">Experiences (JSON)</label>
+                        <textarea class="form-control" id="empExperiences" name="emp_experiences" rows="4"></textarea>
+                        <small class="form-text text-muted">Enter experiences in JSON format, e.g., [{"company":"ABC","years":2}]</small>
+                        <div class="invalid-feedback">Please enter valid JSON for experiences.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="empAssets" class="form-label">Assigned Assets</label>
+                        <select class="form-select" id="empAssets" name="assigned_assets" multiple>
+                            {% for asset in assets %}
+                            <option value="{{ asset.id }}">{{ asset.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="empPhoto" class="form-label">Employee Photo</label>
+                        <input type="file" class="form-control" id="empPhoto" name="emp_photo" accept="image/*">
+                        <div id="empPhotoPreview" class="mt-2"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="empRemarks" class="form-label">Remarks</label>
+                        <textarea class="form-control" id="empRemarks" name="emp_remarks" rows="4"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="employeeFormSubmitBtn">
+                        <i class="bi bi-save me-1"></i><span class="submit-btn-text">Add Employee</span>
+                    </button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #addEditEmployeeModal .modal-content { border-radius: 0.5rem; max-height: 80vh; }
+    #addEditEmployeeModal .modal-body { background-color: #f8f9fa; }
+    #addEditEmployeeModal .form-select[multiple] { height: 150px; }
+    #empPhotoPreview img { max-width: 100px; max-height: 100px; object-fit: cover; }
+    @media (max-width: 767.98px) {
+        #addEditEmployeeModal .modal-dialog { max-width: 95vw; }
+        #addEditEmployeeModal .modal-content { max-height: 100vh; }
+    }
+</style>
+$(document).ready(function() {
+    // Fetch skills on modal open
+    $('#addEditEmployeeModal').on('show.bs.modal', function() {
+        $.ajax({
+            url: '/skill_list/',
+            type: 'GET',
+            success: function(response) {
+                const $skillsSelect = $('#empSkills');
+                $skillsSelect.empty();
+                response.skills.forEach(skill => {
+                    $skillsSelect.append(`<option value="${skill.name}">${skill.name}</option>`);
+                });
+            },
+            error: function(xhr) {
+                console.error('Error fetching skills:', xhr.status, xhr.statusText);
+                $('#empSkills').after('<div class="text-danger">Failed to load skills.</div>');
+            }
+        });
+    });
+
+    // Photo preview
+    $('#empPhoto').on('change', function(e) {
+        const file = e.target.files[0];
+        const $preview = $('#empPhotoPreview');
+        $preview.empty();
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $preview.append(`<img src="${e.target.result}" alt="Photo Preview">`);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+
+function editEmployee(employeeId) {
+    console.log('Editing employee ID:', employeeId);
+    const $modal = $('#addEditEmployeeModal');
+    const $form = $('#employeeForm');
+    const $modalTitle = $('#addEditEmployeeModalLabel .modal-title-text');
+    const $submitBtn = $('#employeeFormSubmitBtn .submit-btn-text');
+
+    // Set form to edit mode
+    $form.attr('action', '/add_employee/');
+    $modalTitle.text('Edit Employee');
+    $submitBtn.text('Update Employee');
+    $('#employeeId').val(employeeId);
+
+    // Reset form and clear validation
+    $form.trigger('reset');
+    $form.find('.is-invalid').removeClass('is-invalid');
+    $('#empPhotoPreview').empty();
+
+    // Fetch employee details
+    $.ajax({
+        url: `/get_employee_for_edit/${employeeId}/`,
+        type: 'GET',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        success: function(response) {
+            if (response.success && response.employee) {
+                const emp = response.employee;
+                $('#empIdBranch').val(emp.emp_id_branch || '');
+                $('#empFirstName').val(emp.emp_first_name || '');
+                $('#empLastName').val(emp.emp_last_name || '');
+                $('#empAadharNumber').val(emp.emp_aadhar_number || '');
+                $('#empDob').val(emp.emp_dob || '');
+                $('#empGender').val(emp.emp_gender || '');
+                $('#empMobile').val(emp.emp_mobile || '');
+                $('#empSecondMobile').val(emp.emp_second_mobile || '');
+                $('#empEmail').val(emp.emp_email || '');
+                $('#empBloodGroup').val(emp.emp_blood_group || '');
+                $('#empQualification').val(emp.emp_qualification ? emp.emp_qualification.id : '');
+                $('#empAddress').val(emp.emp_address || '');
+                $('#empCompany').val(emp.emp_company ? emp.emp_company.id : '');
+                $('#empBranch').val(emp.emp_branch ? emp.emp_branch.id : '');
+                $('#empDepartment').val(emp.emp_department ? emp.emp_department.id : '');
+                $('#empSubDepartment').val(emp.emp_sub_department ? emp.emp_sub_department.id : '');
+                $('#empCategory').val(emp.emp_category ? emp.emp_category.id : '');
+                $('#empDesignation').val(emp.emp_designation ? emp.emp_designation.id : '');
+                $('#empSalary').val(emp.emp_salary || '');
+                $('#empJoiningDate').val(emp.emp_joining_date || '');
+                $('#empResigningDate').val(emp.emp_resigning_date || '');
+                $('#empWorkStartTime').val(emp.emp_work_start_time || '');
+                $('#empWorkEndTime').val(emp.emp_work_end_time || '');
+                $('#empStatus').val(emp.emp_status || 'active');
+                $('#empRemarks').val(emp.emp_remarks || '');
+                $('#empExperiences').val(emp.emp_experiences ? JSON.stringify(emp.emp_experiences, null, 2) : '[]');
+                $('#empSkills').val(emp.emp_extra_skills ? emp.emp_extra_skills.map(skill => skill.name) : []);
+                $('#empAssets').val(emp.emp_assets ? emp.emp_assets.map(asset => asset.id) : []);
+
+                $modal.modal('show');
+            } else {
+                console.error('Error fetching employee details:', response.error);
+                alert('Error: ' + response.error);
+            }
+        },
+        error: function(xhr) {
+            console.error('Error fetching employee details:', xhr.status, xhr.statusText);
+            alert('Failed to load employee details.');
+        }
+    });
+}
+
+function openAddEmployeeModal() {
+    const $form = $('#employeeForm');
+    const $modalTitle = $('#addEditEmployeeModalLabel .modal-title-text');
+    const $submitBtn = $('#employeeFormSubmitBtn .submit-btn-text');
+
+    $form.attr('action', '/add_employee/');
+    $modalTitle.text('Add Employee');
+    $submitBtn.text('Add Employee');
+    $form.trigger('reset');
+    $('#employeeId').val('');
+    $form.find('.is-invalid').removeClass('is-invalid');
+    $('#empPhotoPreview').empty();
+    $('#addEditEmployeeModal').modal('show');
+}
+
+$('#employeeForm').on('submit', function(e) {
+    e.preventDefault();
+    const $form = $(this);
+    $form.find('.is-invalid').removeClass('is-invalid');
+
+    // Client-side validation
+    let isValid = true;
+    $form.find('[required]').each(function() {
+        if (!$(this).val()) {
+            $(this).addClass('is-invalid');
+            isValid = false;
+        }
+    });
+
+    // Validate patterns
+    if ($('#empIdBranch').val() && !/^\d{7}$/.test($('#empIdBranch').val())) {
+        $('#empIdBranch').addClass('is-invalid');
+        isValid = false;
+    }
+    if ($('#empAadharNumber').val() && !/^\d{12}$/.test($('#empAadharNumber').val())) {
+        $('#empAadharNumber').addClass('is-invalid');
+        isValid = false;
+    }
+    if ($('#empMobile').val() && !/^\+?\d{10,15}$/.test($('#empMobile').val())) {
+        $('#empMobile').addClass('is-invalid');
+        isValid = false;
+    }
+    if ($('#empSecondMobile').val() && !/^\+?\d{10,15}$/.test($('#empSecondMobile').val())) {
+        $('#empSecondMobile').addClass('is-invalid');
+        isValid = false;
+    }
+    if ($('#empEmail').val() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('#empEmail').val())) {
+        $('#empEmail').addClass('is-invalid');
+        isValid = false;
+    }
+    try {
+        const experiences = $('#empExperiences').val();
+        if (experiences) JSON.parse(experiences);
+    } catch (e) {
+        $('#empExperiences').addClass('is-invalid');
+        isValid = false;
+    }
+
+    if (!isValid) {
+        alert('Please correct the errors in the form.');
+        return;
+    }
+
+    const formData = new FormData($form[0]);
+    // Convert emp_extra_skills and assigned_assets to JSON strings
+    const skills = $('#empSkills').val() || [];
+    const assets = $('#empAssets').val() || [];
+    formData.set('emp_extra_skills', JSON.stringify(skills));
+    formData.set('assigned_assets', JSON.stringify(assets));
+
+    $.ajax({
+        url: $form.attr('action'),
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: { 'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val() },
+        success: function(response) {
+            if (response.success) {
+                alert($form.find('#employeeId').val() ? 'Employee updated successfully.' : 'Employee added successfully.');
+                $('#addEditEmployeeModal').modal('hide');
+                refreshEmployeeList();
+            } else {
+                console.error('Server error:', response.error);
+                alert('Error: ' + response.error);
+            }
+        },
+        error: function(xhr) {
+            console.error('AJAX error:', xhr.status, xhr.statusText);
+            let errorMsg = $form.find('#employeeId').val() ? 'Failed to update employee' : 'Failed to add employee';
+            try {
+                const response = JSON.parse(xhr.responseText);
+                errorMsg += `: ${response.error || 'Unknown error'}`;
+            } catch (e) {
+                errorMsg += `: ${xhr.status} ${xhr.statusText}`;
+            }
+            alert(errorMsg);
+        }
+    });
+});

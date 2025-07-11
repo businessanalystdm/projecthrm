@@ -1,0 +1,40 @@
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Sl No.</th>
+      <th>Name</th>
+      <th>Code</th>
+      <th>Zone</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for branch in branches %}
+    <tr>
+      <td>{{ forloop.counter }}</td>
+      <td>{{ branch.name }}</td>
+      <td>{{ branch.code }}</td>
+      <td>{{ branch.zone.name }}</td>
+      <td>
+        {% if branch.status == 'active' %}
+          <span class="badge bg-success">Active</span>
+        {% else %}
+          <span class="badge bg-secondary">Inactive</span>
+        {% endif %}
+      </td>
+      <td>
+        <button class="btn btn-sm btn-primary"
+          onclick="editBranch(
+            '{{ branch.id }}',
+            '{{ branch.name }}',
+            '{{ branch.code }}',
+            '{{ branch.zone.id }}',
+            '{{ branch.status }}')">Edit</button>
+        <button class="btn btn-sm btn-danger"
+          onclick="deleteBranch('{{ branch.id }}')">Delete</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>

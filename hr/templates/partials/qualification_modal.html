@@ -1,0 +1,102 @@
+<!-- Qualification Modal -->
+<div class="modal fade" id="qualificationModal" tabindex="-1" aria-labelledby="qualificationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="qualificationModalLabel">Qualification Management</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- Form -->
+        <form id="qualificationForm" method="POST" data-id="">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="qualification_name" class="form-label">Qualification Name</label>
+            <input type="text" class="form-control" id="qualification_name" name="qualification_name" required>
+          </div>
+          <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Qualification</button>
+        </form>
+
+        <hr>
+
+        <!-- Qualification List -->
+        <div id="qualificationList">
+          {% include 'partials/qualification_list.html' %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+function loadQualifications() {
+    fetch("{% url 'qualification_list' %}")
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("qualificationList").innerHTML = html;
+        });
+}
+document.getElementById("qualificationModal").addEventListener("shown.bs.modal", function () {
+    loadQualifications();
+});
+document.getElementById("qualificationForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const form = this;
+    const id = form.getAttribute("data-id");
+    const url = id ? `/qualification/update/${id}/` : `/qualification/add/`;
+
+    fetch(url, {
+        method: "POST",
+        headers: { "X-CSRFToken": getCSRFToken() },
+        body: new FormData(form)
+    }).then(res => res.json())
+      .then(data => {
+        if (data.success) {
+            form.reset();
+            form.removeAttribute("data-id");
+            form.querySelector("button[type=submit]").textContent = "Add Qualification";
+            loadQualifications();
+        } else {
+            alert("Failed to save qualification.");
+        }
+      });
+});
+
+function editQualification(id, name, status) {
+    const form = document.getElementById("qualificationForm");
+    form.setAttribute("data-id", id);
+    form.querySelector("button[type=submit]").textContent = "Update Qualification";
+    document.getElementById("qualification_name").value = name;
+    document.getElementById("status").value = status;
+}
+
+function deleteQualification(id) {
+    if (confirm("Delete this qualification?")) {
+        fetch(`/qualification/delete/${id}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCSRFToken() }
+        }).then(res => res.json())
+          .then(data => {
+              if (data.success) {
+                  loadQualifications();
+              }
+          });
+    }
+}
+</script>

@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+    <meta name="description" content=""/>
+    <meta name="author" content=""/>
+    <title>H R M</title>
+    <!-- Favicon-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/css/bootstrap-select.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico' %}"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css"/>
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet"/>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <!-- Scripts moved to correct order -->
+    <script src="path/to/your/script.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.14.0-beta3/dist/js/bootstrap-select.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #cc202c;
+            --white-70: #ffffff;
+            --accent-color: #e68a90; /* 30% #cc202c mixed with white */
+        }
+        body {
+            background-color: var(--white-70);
+            color: #333;
+        }
+        /* Badge for message count */
+        .badge {
+            font-size: 0.7rem;
+            padding: 0.25em 0.5em;
+            line-height: 1;
+            min-width: 1.5em;
+            text-align: center;
+            z-index: 1; /* Ensure badge is above the icon */
+        }
+        /* Ensure badge aligns properly with the envelope icon */
+        .position-absolute.top-0.start-100.translate-middle {
+            transform: translate(-50%, -50%); /* Center the badge */
+        }
+        /* Optional: Adjust badge for smaller screens */
+        @media (max-width: 576px) {
+            .badge {
+                font-size: 0.6rem;
+                min-width: 1.2em;
+                padding: 0.2em 0.4em;
+            }
+        }
+        #sidebar-wrapper {
+            background-color: var(--primary-color);
+            width: 250px;
+            min-height: 3
+100vh;
+        }
+        .sidebar-heading {
+            background-color: var(--white-70);
+        }
+        .list-group-item {
+            background-color: var(--white-70);
+            color: #333;
+            border-color: var(--accent-color);
+        }
+        .list-group-item:hover {
+            background-color: var(--accent-color);
+            color: var(--white-70);
+        }
+        .navbar {
+            background-color: var(--white-70);
+            border-bottom: 1px solid var(--accent-color);
+        }
+        .nav-link {
+            color: var(--primary-color);
+        }
+        .nav-link:hover {
+            color: var(--accent-color);
+        }
+        .btn-light {
+            background-color: var(--white-70);
+            border-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+        .btn-light:hover {
+            background-color: var(--accent-color);
+            color: var(--white-70);
+        }
+        .btn-secondary {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: var(--white-70);
+        }
+        .btn-secondary:hover {
+            background-color: var(--primary-color);
+            color: var(--white-70);
+        }
+        .card {
+            background-color: var(--white-70);
+            border: 1px solid var(--accent-color);
+        }
+        .card-title {
+            color: var(--primary-color);
+        }
+        .dropdown-menu {
+            background-color: var(--white-70);
+            border: 1px solid var(--accent-color);
+        }
+        .dropdown-item {
+            color: var(--primary-color);
+        }
+        .dropdown-item:hover {
+            background-color: var(--accent-color);
+            color: var(--white-70);
+        }
+        .birthday-today {
+            background-color: #ffeb3b;
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        .messages-dropdown {
+            width: 300px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--white-70);
+        }
+        .message-item {
+            padding: 8px;
+            border-bottom: 1px solid var(--accent-color);
+            cursor: pointer;
+        }
+        .message-item:last-child {
+            border-bottom: none;
+        }
+        .message-item:hover {
+            background-color: var(--accent-color);
+            color: var(--white-70);
+        }
+        .no-messages {
+            color: #6c757d;
+            text-align: center;
+            padding: 20px;
+        }
+        .birthday-message {
+            background-color: #fff3cd;
+        }
+        .anniversary-message {
+            background-color: #d4edda;
+        }
+        .card-group .card {
+            flex: 1 1 0;
+            min-width: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="d-flex" id="wrapper">
+    <div class="border-end bg-white" id="sidebar-wrapper">
+        <div class="sidebar-heading border-bottom bgalternatives bg-light text-center p-0 m-0">
+            <img src="{% static 'images/logo.png' %}" alt="Day Mart HRM Logo" class="img-fluid" style="width: 100%; height: auto; object-fit: contain; padding: 5px;">
+        </div>
+        <div class="list-group list-group-flush">
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">
+                <i class="bi bi-house-door-fill"></i> Home
+            </a>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" data-bs-toggle="collapse" href="#masterMenu" aria-expanded="false">
+                <i class="bi bi-gear-fill"></i> Master <span>▼</span>
+            </a>
+            <div class="collapse ps-3" id="masterMenu">
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#" data-bs-toggle="modal" data-bs-target="#companyNameModal">Company</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#" data-bs-toggle="modal" data-bs-target="#departmentModal">Department</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#" data-bs-toggle="modal" data-bs-target="#subDepartmentModal">Sub Department</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#" data-bs-toggle="modal" data-bs-target="#categoryModal">Category</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#" data-bs-toggle="modal" data-bs-target="#designationModal">Designation</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#" data-bs-toggle="modal" data-bs-target="#zoneModal">Zone of Operations</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#" data-bs-toggle="modal" data-bs-target="#branchesModal">Branches</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#" data-bs-toggle="modal" data-bs-target="#assetsModal">Assets</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#" data-bs-toggle="modal" data-bs-target="#qualificationModal">Qualification</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Evaluation Master</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Question</a>
+            </div>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" data-bs-toggle="collapse" href="#transactionMenu" aria-expanded="false">
+                <i class="bi bi-cash-stack"></i> Transaction <span>▼</span>
+            </a>
+            <div class="collapse ps-3" id="transactionMenu">
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Submitted Assessment</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Employee Assessment</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Employee Remarks</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Branch Transfer</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Festival Bonus</a>
+            </div>
+            <a class="list-group-item list-group-item-action list-group-item-light p-3" data-bs-toggle="collapse" href="#reportsMenu" aria-expanded="false">
+                <i class="bi bi-file-bar-graph"></i> Reports <span>▼</span>
+            </a>
+            <div class="collapse ps-3" id="reportsMenu">
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Employee Report</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Mobile Punch Details</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Outsider's Attendance</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Basic Attendance Report</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Detailed Attendance</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Assessment Report</a>
+                <a class="list-group-item list-group-item-action list-group-item-light p-2" href="#!">Festival Bonus Report</a>
+            </div>
+        </div>
+    </div>
+    <div id="page-content-wrapper">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+            <div class="container-fluid d-flex justify-content-center">
+                <h1 class="mt-4 text-center w-100" style="color: var(--primary-color);">HUMAN RESOURCE MANAGEMENT</h1>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                        <li class="nav-item dropdown position-relative">
+                            <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-envelope"></i>
+                                {% if messages %}
+                                <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle">
+                                    {{ messages|length }}
+                                </span>
+                                {% endif %}
+                            </a>
+                            <div class="dropdown-menu messages-dropdown dropdown-menu-end" aria-labelledby="messagesDropdown">
+                                {% if messages %}
+                                {% for message in messages %}
+                                <div class="message-item {% if message.type == 'birthday' %}birthday-message{% else %}anniversary-message{% endif %}">
+                                    <p class="mb-1">{{ message.content }}</p>
+                                    <small class="text-muted">{{ message.time }}</small>
+                                </div>
+                                {% empty %}
+                                <div class="no-messages">No birthdays or anniversaries today</div>
+                                {% endfor %}
+                                {% else %}
+                                <div class="no-messages">No birthdays or anniversaries today</div>
+                                {% endif %}
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gear"></i>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="settingsDropdown">
+                                {% if user.is_authenticated %}
+                                <div class="container mt-3">
+                                    <p>Welcome, {{ user.username }}!</p>
+                                </div>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" id="logoutLink">Logout</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <br>
+        <div class="container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <button class="btn btn-light w-100" type="button" data-bs-toggle="modal" data-bs-target="#employeeModal"><i class="bi bi-person-fill"></i> Add Employee</button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button id="listEmployeeBtn" type="button" class="btn btn-light w-100">
+                            <i class="bi bi-people-fill"></i> List Employees
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button id="employeeHistoryBtn" type="button" class="btn btn-light w-100" data-bs-toggle="modal" data-bs-target="#employeeHistoryModal" onclick="loadEmployeeHistory()">
+                            <i class="bi bi-clock-history"></i> Employee History
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button id="resignedEmployeeBtn" type="button" class="btn btn-light w-100">
+                            <i class="bi bi-person-x"></i> Resigned Employees
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button type="button" class="btn btn-light w-100">
+                            <i class="bi bi-calendar-check-fill"></i> Attendance Basic
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button type="button" class="btn btn-light w-100">
+                            <i class="bi bi-clipboard-data"></i> Assessment Report
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button type="button" class="btn btn-light w-100">
+                            <i class="bi bi-phone-fill"></i> Employee Assessment
+                        </button>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <button type="button" class="btn btn-light w-100">
+                            <i class="bi bi-gift-fill"></i> Festive Bonus Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="employeeListContainer" class="mt-3"></div>
+            <br>
+            <br>
+            <div class="card-group" id="notificationCards">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Last Joined 15 Employees</h6>
+                        <ul class="list-unstyled">
+                            {% for emp in last_15_employees %}
+                            <li>{{ forloop.counter }}) {{ emp.emp_first_name }} {{ emp.emp_last_name }} - Joined on {{ emp.emp_joining_date|date:"M d, Y" }}</li>
+                            {% empty %}
+                            <li>No employees found.</li>
+                            {% endfor %}
+                        </ul>
+                        <p class="card-text"><small class="text-body-secondary">Last updated {{ now|date:"M d, Y H:i" }}</small></p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Last Resigned 15 Employees</h6>
+                        <ul class="list-unstyled">
+                            {% for emp in last_15_resigned %}
+                            <li>{{ forloop.counter }}) {{ emp.emp_first_name }} {{ emp.emp_last_name }} - Resigned on {{ emp.emp_resigning_date|date:"M d, Y" }}</li>
+                            {% empty %}
+                            <li>No resigned employees found.</li>
+                            {% endfor %}
+                        </ul>
+                        <p class="card-text"><small class="text-body-secondary">Last updated {{ now|date:"M d, Y H:i" }}</small></p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title">Birthday Notification</h6>
+                        <ul class="list-unstyled">
+                            {% for emp in birthday_employees %}
+                            <li {% if emp.is_today %}class="birthday-today" {% endif %}>
+                                {{ forloop.counter }}) {{ emp.emp_first_name }} {{ emp.emp_last_name }} - Born on {{ emp.emp_dob|date:"M d" }} {% if emp.is_today %}(Today!){% endif %}
+                            </li>
+                            {% empty %}
+                            <li>No birthdays found.</li>
+                            {% endfor %}
+                        </ul>
+                        <p class="card-text"><small class="text-body-secondary">Last updated {{ now|date:"M d, Y H:i" }}</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tagify -->
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<!-- Custom scripts -->
+<script src="{% static 'js/scripts.js' %}"></script>
+
+<!-- Sidebar collapse toggle script -->
+<script>
+    $(document).ready(function() {
+        $('.list-group-item[data-bs-toggle="collapse"]').on('click', function(e) {
+            e.preventDefault();
+            const target = $(this).attr('href');
+            const $collapse = $(target);
+            $collapse.collapse('toggle');
+
+            // Update aria-expanded and toggle arrow
+            const isExpanded = $collapse.hasClass('show');
+            $(this).attr('aria-expanded', isExpanded);
+            const $span = $(this).find('span');
+            $span.text(isExpanded ? '▲' : '▼');
+        });
+    });
+</script>
+
+<script>
+    (function() {
+        let currentPage = 1;
+        let rowsPerPage = 25;
+
+        function paginateEmployees() {
+            const $rows = $('#employeeTableBody tr');
+            const totalRows = $rows.filter(function() {
+                return $(this).data('matches') !== false;
+            }).length;
+            const totalPages = Math.ceil(totalRows / rowsPerPage);
+
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+
+            $rows.hide();
+
+            let visibleCount = 0;
+            let startIndex = (currentPage - 1) * rowsPerPage + 1;
+            $rows.each(function() {
+                if ($(this).data('matches') !== false) {
+                    if (visibleCount >= (currentPage - 1) * rowsPerPage && visibleCount < currentPage * rowsPerPage) {
+                        $(this).show();
+                        $(this).find('.serial-number').text(visibleCount + startIndex - (currentPage - 1) * rowsPerPage);
+                    }
+                    visibleCount++;
+                }
+            });
+
+            const $pagination = $('#paginationControls');
+            $pagination.empty();
+            if (totalPages > 1) {
+                $pagination.append(`
+                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage - 1}" aria-label="Previous">
+                            <span aria-hidden="true">«</span>
+                        </a>
+                    </li>
+                `);
+                const maxPagesToShow = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+                let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+                if (endPage - startPage + 1 < maxPagesToShow) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                }
+                if (startPage > 1) {
+                    $pagination.append(`<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>`);
+                    if (startPage > 2) $pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+                }
+                for (let i = startPage; i <= endPage; i++) {
+                    $pagination.append(`
+                        <li class="page-item ${i === currentPage ? 'active' : ''}">
+                            <a class="page-link" href="#" data-page="${i}">${i}</a>
+                        </li>
+                    `);
+                }
+                if (endPage < totalPages) {
+                    if (endPage < totalPages - 1) $pagination.append(`<li class="page-item disabled"><span class="page-link">...</span></li>`);
+                    $pagination.append(`<li class="page-item"><a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a></li>`);
+                }
+                $pagination.append(`
+                    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" data-page="${currentPage + 1}" aria-label="Next">
+                            <span aria-hidden="true">»</span>
+                        </a>
+                    </li>
+                `);
+            }
+        }
+
+        function filterEmployees() {
+            const $listBox = $('#employeeListBox');
+            if (!$listBox.length) {
+                console.warn('Employee list box not found');
+                return;
+            }
+            const listType = $listBox.data('list-type') || '';
+            let nameInput = '';
+            let idInput = '';
+            let skillInput = '';
+            let startDate = '';
+            let endDate = '';
+
+            const companyFilter = $('#filterCompany').val() || '';
+            const departmentFilter = $('#filterDepartment').val() || '';
+            const subDepartmentFilter = $('#filterSubDepartment').val() || '';
+            const categoryFilter = $('#filterCategory').val() || '';
+            const designationFilter = $('#filterDesignation').val() || '';
+            const qualificationFilter = $('#filterQualification').val() || '';
+            const zoneFilter = $('#filterZone').val() || '';
+            const branchFilter = $('#filterBranch').val() || '';
+
+            if (listType === 'active') {
+                const $employeeSearch = $('#employeeSearch');
+                const $skillSearch = $('#skillSearch');
+                nameInput = $employeeSearch.length ? $employeeSearch.val().toLowerCase() : '';
+                skillInput = $skillSearch.length ? $skillSearch.val().toLowerCase() : '';
+            } else if (listType === 'resigned') {
+                const $employeeIdSearch = $('#employeeIdSearch');
+                const $employeeNameSearch = $('#employeeNameSearch');
+                const $startDate = $('#startDate');
+                const $endDate = $('#endDate');
+                idInput = $employeeIdSearch.length ? $employeeIdSearch.val().toLowerCase() : '';
+                nameInput = $employeeNameSearch.length ? $employeeNameSearch.val().toLowerCase() : '';
+                startDate = $startDate.length ? $startDate.val() : '';
+                endDate = $endDate.length ? $endDate.val() : '';
+            } else {
+                console.warn('Unknown list type:', listType);
+                return;
+            }
+
+            $('#employeeTableBody tr').each(function() {
+                const $row = $(this);
+                const fullName = ($row.data('employee-name') || '').toLowerCase();
+                const empIdBranch = ($row.data('emp-id-branch') || '').toLowerCase();
+                const skills = ($row.data('skills') || '').toLowerCase();
+                const resignDate = $row.data('resigning-date') || '';
+                const companyId = $row.data('company-id') || '0';
+                const departmentId = $row.data('department-id') || '0';
+                const subDepartmentId = $row.data('sub-department-id') || '0';
+                const categoryId = $row.data('category-id') || '0';
+                const designationId = $row.data('designation-id') || '0';
+                const qualificationId = $row.data('qualification-id') || '0';
+                const zoneId = $row.data('zone-id') || '0';
+                const branchId = $row.data('branch-id') || '0';
+
+                const matchesName = !nameInput || fullName.includes(nameInput);
+                const matchesId = !idInput || empIdBranch.includes(idInput);
+                const matchesSkill = !skillInput || skills.includes(skillInput);
+                const matchesCompany = !companyFilter || companyId === companyFilter;
+                const matchesDepartment = !departmentFilter || departmentId === departmentFilter;
+                const matchesSubDepartment = !subDepartmentFilter || subDepartmentId === subDepartmentFilter;
+                const matchesCategory = !categoryFilter || categoryId === categoryFilter;
+                const matchesDesignation = !designationFilter || designationId === designationFilter;
+                const matchesQualification = !qualificationFilter || qualificationId === qualificationFilter;
+                const matchesZone = !zoneFilter || zoneId === zoneFilter;
+                const matchesBranch = !branchFilter || branchId === branchFilter;
+
+                let dateMatch = true;
+                if (listType === 'resigned' && (startDate || endDate)) {
+                    if (!resignDate) {
+                        dateMatch = false;
+                    } else {
+                        if (startDate && resignDate < startDate) dateMatch = false;
+                        if (endDate && resignDate > endDate) dateMatch = false;
+                    }
+                }
+
+                const matches = dateMatch && matchesName && matchesId && matchesSkill &&
+                                matchesCompany && matchesDepartment && matchesSubDepartment &&
+                                matchesCategory && matchesDesignation && matchesQualification &&
+                                matchesZone && matchesBranch;
+
+                $row.data('matches', matches);
+                $row.hide();
+            });
+
+            currentPage = 1;
+            paginateEmployees();
+        }
+
+        $(document).ready(function() {
+            $('#logoutLink').on('click', function(e) {
+                e.preventDefault();
+                console.log('Logout clicked');
+                $.ajax({
+                    url: '/logout/',
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': $('meta[name="csrf-token"]').attr('content') },
+                    success: function(data) {
+                        console.log('Logout successful');
+                        window.location.href = '/';
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Logout error:', status, error, xhr.responseText);
+                        alert('Error logging out. Please try again.');
+                    }
+                });
+            });
+
+            $('#listEmployeeBtn').on('click', function() {
+                console.log('List Employees button clicked');
+                $('#notificationCards').hide();
+                $('#employeeListContainer').html('<div class="text-center p-3"><p>Loading...</p></div>');
+                $.ajax({
+                    url: '/list-employees/',
+                    method: 'GET',
+                    success: function(data) {
+                        $('#employeeListContainer').html(data);
+                        $('#employeeListContainer').prepend(
+                            '<div class="text-end mb-3">' +
+                                '<button id="closeEmployeeList" class="btn btn-secondary">Close List</button>' +
+                            '</div>'
+                        );
+                        setTimeout(filterEmployees, 0);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading employees:', status, error, xhr.responseText);
+                        $('#employeeListContainer').html(
+                            '<div class="alert alert-danger">Failed to render employee list.</div>'
+                        );
+                        $('#notificationCards').show();
+                    }
+                });
+            });
+
+            $('#resignedEmployeeBtn').on('click', function() {
+                console.log('Resigned Employees button clicked');
+                $('#notificationCards').hide();
+                $('#employeeListContainer').html('<div class="text-center p-3"><p>Loading...</p></div>');
+                $.ajax({
+                    url: '/list-resigned-employees/',
+                    method: 'GET',
+                    success: function(data) {
+                        $('#employeeListContainer').html(data);
+                        $('#employeeListContainer').prepend(
+                            '<div class="text-end mb-3">' +
+                                '<button id="closeEmployeeList" class="btn btn-secondary">Close List</button>' +
+                            '</div>'
+                        );
+                        setTimeout(filterEmployees, 0);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading resigned employees:', status, error, xhr.responseText);
+                        $('#employeeListContainer').html(
+                            '<div class="alert alert-danger">Failed to load resigned employees.</div>'
+                        );
+                        $('#notificationCards').show();
+                    }
+                });
+            });
+
+            $(document).on('click', '#closeEmployeeList', function() {
+                console.log('Close Employee List button clicked');
+                $('#employeeListContainer').empty();
+                $('#notificationCards').show();
+            });
+
+            $('#employeeHistoryBtn').on('click', function() {
+                console.log('Employee History button clicked');
+                loadEmployeeHistory();
+            });
+
+            $('#searchEmployeeBtn').on('click', function() {
+                const employeeId = $('#employeeIdSearch').val().trim();
+                console.log('Search Employee with ID:', employeeId);
+                if (employeeId && !isNaN(employeeId)) {
+                    loadEmployeeHistory(employeeId);
+                } else {
+                    alert('Please enter a valid Employee ID.');
+                }
+            });
+
+            $('#clearSearchBtn').on('click', function() {
+                console.log('Clear Search clicked');
+                $('#employeeIdSearch').val('');
+                loadEmployeeHistory();
+            });
+
+            $('#employeeIdSearch').on('keypress', function(e) {
+                if (e.which === 13) {
+                    console.log('Enter key pressed in search input');
+                    $('#searchEmployeeBtn').click();
+                }
+            });
+
+            let filterTimeout;
+            $(document).on('input', '#employeeSearch, #skillSearch, #employeeIdSearch, #employeeNameSearch, #startDate, #endDate', function() {
+                clearTimeout(filterTimeout);
+                filterTimeout = setTimeout(filterEmployees, 300);
+            });
+
+            $(document).on('change', '#filterCompany, #filterDepartment, #filterSubDepartment, #filterCategory, #filterDesignation, #filterQualification, #filterZone, #filterBranch', function() {
+                filterEmployees();
+            });
+
+            $(document).on('click', '.page-link', function(e) {
+                e.preventDefault();
+                const page = $(this).data('page');
+                if (page) {
+                    currentPage = parseInt(page);
+                    paginateEmployees();
+                }
+            });
+
+            function loadEmployeeHistory(employeeId = null) {
+                console.log('loadEmployeeHistory called with employeeId:', employeeId);
+                if (!$('#employeeHistoryModal').length) {
+                    console.error('Modal #employeeHistoryModal not found');
+                    alert('Employee History modal not found.');
+                    return;
+                }
+                $('#employeeHistoryModal').modal('show');
+                $('#employeeHistoryContainer').html('<div class="text-center p-3"><p>Loading...</p></div>');
+                const url = '{% url "list_employees_with_history" %}';
+                const data = employeeId ? { employee_id: employeeId } : {};
+                $.ajax({
+                    url: url,
+                    method: 'GET',
+                    data: data,
+                    success: function(data) {
+                        $('#employeeHistoryContainer').html(data);
+                        $('.show-branch-history').off('click').on('click', function() {
+                            const empId = $(this).data('employee-id');
+                            loadBranchHistory(empId);
+                        });
+                        $('.show-salary-increment').off('click').on('click', function() {
+                            const empId = $(this).data('employee-id');
+                            loadSalaryHistory(empId);
+                        });
+                        $('.show-promotion-history').off('click').on('click', function() {
+                            const empId = $(this).data('employee-id');
+                            loadPromotionHistory(empId);
+                        });
+                        $('.show-employee-history').off('click').on('click', function() {
+                            loadEmployeeHistory();
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading employee history:', status, error, xhr.responseText);
+                        $('#employeeHistoryContainer').html(
+                            '<div class="alert alert-danger text-center">Failed to load employee history.</div>'
+                        );
+                    }
+                });
+            }
+
+            function loadBranchHistory(employeeId) {
+                console.log('loadBranchHistory for employee ID:', employeeId);
+                $('#employeeHistoryContainer').html('<div class="text-center p-3"><p>Loading branch history...</p></div>');
+                $.ajax({
+                    url: '{% url "get_employee_branch_history" %}',
+                    method: 'GET',
+                    data: { employee_id: employeeId },
+                    success: function(data) {
+                        $('#employeeHistoryContainer').html(data);
+                        $('.show-employee-history').off('click').on('click', function() {
+                            loadEmployeeHistory();
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading branch history:', status, error, xhr.responseText);
+                        $('#employeeHistoryContainer').html(
+                            '<div class="alert alert-danger">Failed to load branch history.</div>'
+                        );
+                    }
+                });
+            }
+
+            function loadSalaryHistory(employeeId) {
+                console.log('loadSalaryHistory for employee ID:', employeeId);
+                $('#employeeHistoryContainer').html('<div class="text-center p-3"><p>Loading salary history...</p></div>');
+                $.ajax({
+                    url: '{% url "get_employee_salary_history" %}',
+                    method: 'GET',
+                    data: { employee_id: employeeId },
+                    success: function(data) {
+                        $('#employeeHistoryContainer').html(data);
+                        $('.show-employee-history').off('click').on('click', function() {
+                            loadEmployeeHistory();
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading salary history:', status, error, xhr.responseText);
+                        $('#employeeHistoryContainer').html(
+                            '<div class="alert alert-danger">Failed to load salary history.</div>'
+                        );
+                    }
+                });
+            }
+
+            function loadPromotionHistory(employeeId) {
+                console.log('loadPromotionHistory for employee ID:', employeeId);
+                $('#employeeHistoryContainer').html('<div class="text-center p-3"><p>Loading promotion history...</p></div>');
+                $.ajax({
+                    url: '{% url "promotion_history" %}',
+                    method: 'GET',
+                    data: { employee_id: employeeId },
+                    success: function(data) {
+                        $('#employeeHistoryContainer').html(data);
+                        $('.show-employee-history').off('click').on('click', function() {
+                            loadEmployeeHistory();
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading promotion history:', status, error, xhr.responseText);
+                        $('#employeeHistoryContainer').html(
+                            '<div class="alert alert-danger">Failed to load promotion history.</div>'
+                        );
+                    }
+                });
+            }
+        });
+    })();
+</script>
+
+{% include "partials/company_modal.html" %}
+{% include "partials/department_modal.html" %}
+{% include "partials/sub_department_modal.html" %}
+{% include "partials/category_modal.html" %}
+{% include "partials/qualification_modal.html" %}
+{% include "partials/designation_modal.html" %}
+{% include "partials/zone_modal.html" %}
+{% include "partials/branches_modal.html" %}
+{% include "partials/employee.html" %}
+{% include "partials/assets_modal.html" %}
+{% include "partials/employee_history.html" %}
+
+</body>
+</html>

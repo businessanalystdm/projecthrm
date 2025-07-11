@@ -1,0 +1,113 @@
+<!-- Company Name Modal -->
+
+<div class="modal fade" id="companyNameModal" tabindex="-1" aria-labelledby="companyNameModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="companyNameModalLabel">Company Name Management</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Form -->
+                <form id="companyNameForm" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="company_name" class="form-label">Company Name</label>
+                        <input type="text" class="form-control" id="company_name" name="company_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Company</button>
+                </form>
+
+                <hr>
+
+                <!-- Company List -->
+                <div id="companyNameList">
+                    {% include 'partials/company_list.html' %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+  function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+  }
+
+  function loadCompanyNames() {
+    fetch("{% url 'company_name_list' %}")
+      .then(response => response.text())
+      .then(html => {
+        document.getElementById("companyNameList").innerHTML = html;
+      });
+  }
+
+  document.getElementById("companyNameForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const form = this;
+    const id = form.getAttribute("data-id");
+    const url = id ? `/company-name/update/${id}/` : `/company-name/add/`;
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCSRFToken()
+      },
+      body: new FormData(form)
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          form.reset();  // ✅ Clears all fields
+          form.removeAttribute("data-id");
+          form.querySelector("button[type=submit]").textContent = "Add Company";
+          form.classList.remove("was-validated");  // ✅ Optional Bootstrap class cleanup
+          loadCompanyNames();  // ✅ Refresh list
+        } else {
+          alert("Failed to save company. Check input or try again.");
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Something went wrong.");
+      });
+  });
+
+  function editCompanyName(id, name, status) {
+    const form = document.getElementById("companyNameForm");
+    form.setAttribute("data-id", id);
+    document.getElementById("company_name").value = name;
+    document.getElementById("status").value = status;
+    form.querySelector("button[type=submit]").textContent = "Update Company";
+  }
+
+  function deleteCompanyName(id) {
+    if (confirm("Delete this company?")) {
+      fetch(`/company-name/delete/${id}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCSRFToken()
+        }
+      }).then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            loadCompanyNames();
+          }
+        });
+    }
+  }
+</script>

@@ -1,0 +1,124 @@
+<!-- Assets Modal -->
+<div class="modal fade" id="assetsModal" tabindex="-1" aria-labelledby="assetsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="assetsModalLabel">Assets Management</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="assetsForm" data-id="">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="asset_name" class="form-label">Asset Name</label>
+            <input type="text" class="form-control" id="asset_name" name="asset_name" required>
+          </div>
+          <div class="mb-3">
+            <label for="asset_status" class="form-label">Status</label>
+            <select class="form-select" id="asset_status" name="status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Asset</button>
+        </form>
+
+        <hr>
+        <div id="assetList">{% include 'partials/assets_list.html' %}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+function loadAssets() {
+    fetch("{% url 'asset_list' %}")
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById("assetList").innerHTML = html;
+        });
+}
+
+document.getElementById("assetsForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    const form = this;
+    const id = form.getAttribute("data-id");
+    const url = id ? `/assets/update/${id}/` : `/assets/add/`;
+
+    fetch(url, {
+        method: "POST",
+        headers: { "X-CSRFToken": getCSRFToken() },
+        body: new FormData(form)
+    }).then(res => res.json())
+      .then(data => {
+        if (data.success) {
+            form.reset();
+            form.removeAttribute("data-id");
+            form.querySelector("button[type=submit]").textContent = "Add Asset";
+            loadAssets();
+            refreshAssetOptions();
+        } else {
+            alert("Failed to save asset: " + data.error);
+        }
+      });
+});
+
+function editAsset(id, name, status) {
+    const form = document.getElementById("assetsForm");
+    form.setAttribute("data-id", id);
+    document.getElementById("asset_name").value = name;
+    document.getElementById("asset_status").value = status;
+    form.querySelector("button[type=submit]").textContent = "Update Asset";
+}
+
+function deleteAsset(id) {
+    if (confirm("Delete this asset?")) {
+        fetch(`/assets/delete/${id}/`, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCSRFToken() }
+        }).then(res => res.json())
+          .then(data => {
+              if (data.success) {
+                  loadAssets();
+                  refreshAssetOptions();
+              } else {
+                  alert("Failed to delete asset: " + data.error);
+              }
+          });
+    }
+}
+
+function selectAsset(assetId, assetName) {
+    const select = document.getElementById("emp_assets");
+    // Check if asset is already selected
+    if (!select.querySelector(`option[value='${assetId}']`)) {
+        const option = new Option(assetName, assetId, true, true);
+        select.appendChild(option);
+    }
+    // Close the modal
+    bootstrap.Modal.getInstance(document.getElementById("assetsModal")).hide();
+}
+
+function refreshAssetOptions() {
+    fetch("{% url 'asset_list' %}", {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+        .then(response => response.json())
+        .then(data => {
+            const select = document.getElementById("emp_assets");
+            // Preserve currently selected assets
+            const selectedIds = Array.from(select.selectedOptions).map(opt => opt.value);
+            select.innerHTML = ''; // Clear current options
+            data.assets.forEach(asset => {
+                const option = new Option(asset.name, asset.id, false, selectedIds.includes(asset.id.toString()));
+                select.appendChild(option);
+            });
+        });
+}
+</script>

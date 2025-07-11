@@ -1,0 +1,125 @@
+<!-- Updated Upgrade Button -->
+<button class="btn btn-success btn-sm upgrade-btn" onclick="updateEmployee({{ emp.id }})" title="Upgrade Employee">
+    <i class="bi bi-arrow-up"></i>
+</button>
+
+<!-- Upgrade Employee Modal -->
+<div class="modal fade" id="upgradeEmployeeModal" tabindex="-1" aria-labelledby="upgradeEmployeeModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-custom-75">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="upgradeEmployeeModalLabel">Upgrade Employee: {{ emp.emp_first_name }} {{ emp.emp_last_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="upgradeEmployeeForm" method="POST" action="{% url 'upgrade_employee' emp.id %}">
+                    {% csrf_token %}
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="currentBranch" class="form-label">Current Branch</label>
+                                    <input type="text" class="form-control" id="currentBranch" value="{{ emp.branch.name }}" readonly>
+                                    <input type="hidden" name="current_branch_id" value="{{ emp.branch.id }}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="branchTransfer" class="form-label">New Branch</label>
+                                    <select class="form-select" id="branchTransfer" name="branch_transfer" required>
+                                        <option value="" disabled selected>Select a new branch</option>
+                                        {% for branch in branches %}
+                                        <option value="{{ branch.id }}">{{ branch.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="transferDate" class="form-label">Transfer Date</label>
+                                    <input type="date" class="form-control" id="transferDate" name="transfer_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="promotion" class="form-label">Promotion (New Designation)</label>
+                                    <input type="text" class="form-control" id="promotion" name="promotion"
+                                           placeholder="Enter new designation">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="salaryIncrement" class="form-label">Salary Increment (₹)</label>
+                                    <input type="number" class="form-control" id="salaryIncrement" name="salary_increment"
+                                           min="0" step="1000" placeholder="Enter increment amount">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="employeeRating" class="form-label">Rate the Employee</label>
+                                    <select class="form-select" id="employeeRating" name="employee_rating">
+                                        <option value="" disabled selected>Select rating</option>
+                                        <option value="1">1 - Poor</option>
+                                        <option value="2">2 - Fair</option>
+                                        <option value="3">3 - Good</option>
+                                        <option value="4">4 - Very Good</option>
+                                        <option value="5">5 - Excellent</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success">Save Upgrades</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal-custom-75 {
+    max-width: 75vw !important;
+    width: 75vw !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.modal-custom-75 .modal-content {
+    overflow-y: auto;
+    max-height: 80vh; /* Limit height for better usability */
+}
+
+.modal-custom-75 .modal-body {
+    padding: 1.5rem;
+}
+
+.upgrade-btn:hover {
+    background-color: #28a745;
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+}
+</style>
+
+<script>
+function updateEmployee(employeeId) {
+    try {
+        // Find the form
+        const form = document.getElementById('upgradeEmployeeForm');
+        if (!form) {
+            console.error('Form with ID upgradeEmployeeForm not found');
+            return;
+        }
+
+        // Update form action dynamically
+        const baseUrl = "{% url 'upgrade_employee' 0 %}".replace('/0/', '/' + employeeId + '/');
+        form.action = baseUrl;
+
+        // Initialize and show the modal
+        const modalElement = document.getElementById('upgradeEmployeeModal');
+        if (!modalElement) {
+            console.error('Modal with ID upgradeEmployeeModal not found');
+            return;
+        }
+        const upgradeModal = new bootstrap.Modal(modalElement);
+        upgradeModal.show();
+    } catch (error) {
+        console.error('Error in updateEmployee:', error);
+    }
+}
+</script>
