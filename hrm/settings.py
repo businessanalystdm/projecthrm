@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-%y^j4ambwx$8sin$(n$%41vik2f+62)1f6)wafc=_p319m_f6d
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['.onrender.com']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'hr',
     'accounts',
+    'mobile_punchin',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

@@ -26,6 +26,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import never_cache
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
+from mobile_punchin.models import MobilePunchin
 
 logger = logging.getLogger(__name__)
 
@@ -86,6 +87,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context["employees"] = Employee.objects.all()
         context["branches"] = Branches.objects.all()
         context["assets"] = Assets.objects.all()
+        context["mobile_punchins"] = MobilePunchin.objects.all()
 
         messages = []
         employees = Employee.objects.select_related('emp_branch').filter(emp_status="active")

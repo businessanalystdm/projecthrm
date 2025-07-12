@@ -1,0 +1,42 @@
+<div class="modal fade" id="listMobilePunchinIdsModal" tabindex="-1" aria-labelledby="listMobilePunchinIdsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="listMobilePunchinIdsModalLabel">Mobile Punch-in IDs</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="mobilePunchinListContainer">
+                <div class="card">
+                        <table class="table table-bordered" id="mobilePunchinTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Username</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mobilePunchinTableBody">
+                                {% for punchin in mobile_punchins %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ punchin.id|default:'N/A' }}</td>
+                                    <td>{{ punchin.name|default:'N/A' }}</td>
+                                    <td>{{ punchin.email|default:'N/A' }}</td>
+                                    <td>{{ punchin.username|default:'N/A' }}</td>
+                                    <td>{{ punchin.created_at|date:"M d, Y H:i"|default:'N/A' }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">No Mobile Punch-in IDs found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>

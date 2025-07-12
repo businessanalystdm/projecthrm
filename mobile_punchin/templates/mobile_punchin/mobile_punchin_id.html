@@ -1,0 +1,45 @@
+{% load static %}
+<!-- Modal for Create Mobile Punch-in ID -->
+<div class="modal fade" id="createMobilePunchinIdModal" tabindex="-1" aria-labelledby="createMobilePunchinIdModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: var(--white-70); border-bottom: 1px solid var(--accent-color);">
+                <h5 class="modal-title" id="createMobilePunchinIdModalLabel" style="color: var(--primary-color);">Create Mobile Punch-in ID</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" style="background-color: var(--white-70);">
+                <form id="createMobilePunchinIdForm" method="POST" action="{% url 'create_mobile_punchin_id' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="mobilePunchinId" class="form-label" style="color: var(--primary-color);">ID</label>
+                        <input type="text" class="form-control" id="mobilePunchinId" name="id" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mobilePunchinName" class="form-label" style="color: var(--primary-color);">Name</label>
+                        <input type="text" class="form-control" id="mobilePunchinName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mobilePunchinUsername" class="form-label" style="color: var(--primary-color);">Username</label>
+                        <input type="text" class="form-control" id="mobilePunchinUsername" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mobilePunchinEmail" class="form-label" style="color: var(--primary-color);">Email</label>
+                        <input type="email" class="form-control" id="mobilePunchinEmail" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mobilePunchinPassword" class="form-label" style="color: var(--primary-color);">Password</label>
+                        <input type="password" class="form-control" id="mobilePunchinPassword" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mobilePunchinConfirmPassword" class="form-label" style="color: var(--primary-color);">Confirm Password</label>
+                        <input type="password" class="form-control" id="mobilePunchinConfirmPassword" name="confirm_password" required>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-light" style="background-color: var(--accent-color); color: var(--white-70);">Create ID</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
