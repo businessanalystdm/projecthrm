@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
+from django.utils import timezone
+from hr.models import Branches
 
 class MobilePunchin(models.Model):
     id = models.CharField(max_length=50, primary_key=True, unique=True)
@@ -31,17 +33,24 @@ class MobilePunchin(models.Model):
         verbose_name_plural = 'Mobile Punch-ins'
 
 class PunchRecord(models.Model):
-    user = models.OneToOneField(
+    user = models.ForeignKey(
         MobilePunchin,
         on_delete=models.CASCADE,
-        primary_key=True,
-        related_name='punch_record'
+        related_name='punch_records'
     )
-
+    date = models.DateField(default=timezone.now)
     punch_in_time = models.DateTimeField(null=True, blank=True)
+    punch_in_branch=models.ForeignKey(Branches, on_delete=models.CASCADE, related_name='punch_in_branches')
     punch_out_time = models.DateTimeField(null=True, blank=True)
-
-
+    punch_out_branch=models.ForeignKey(Branches, on_delete=models.CASCADE, related_name='punch_out_branches',null=True, blank=True)
 
     def __str__(self):
-        return f"Punch record for {self.user.username}"
+        return f"Punch record for {self.user.username} on {self.date}"
+
+    class Meta:
+        db_table = 'punch_record'
+        verbose_name = 'Punch Record'
+        verbose_name_plural = 'Punch Records'
+        unique_together = ('user', 'date')
+
+

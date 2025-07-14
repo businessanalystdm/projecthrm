@@ -1,10 +1,11 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from .models import MobilePunchin
-import logging
-from django.contrib.auth import authenticate, login
+from django.utils import timezone
+from .models import MobilePunchin, PunchRecord
+from hr.models import Branches
 
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +20,8 @@ def create_mobile_punchin_id(request):
             password = request.POST.get('password')
             confirm_password = request.POST.get('confirm_password')
 
-            # Validate password confirmation
             if password != confirm_password:
                 return JsonResponse({'error': 'Passwords do not match'}, status=400)
-
-            # Check for existing email or username
             if MobilePunchin.objects.filter(email=email).exists():
                 return JsonResponse({'error': 'Email already exists'}, status=400)
             if MobilePunchin.objects.filter(username=username).exists():
@@ -31,7 +29,6 @@ def create_mobile_punchin_id(request):
             if MobilePunchin.objects.filter(id=id).exists():
                 return JsonResponse({'error': 'ID already exists'}, status=400)
 
-            # Create MobilePunchin record
             mobile_punchin = MobilePunchin(
                 id=id,
                 name=name,
@@ -40,9 +37,9 @@ def create_mobile_punchin_id(request):
             )
             mobile_punchin.set_password(password)
             mobile_punchin.save()
-
             return JsonResponse({'message': 'Mobile Punch-in ID created successfully'}, status=201)
         except Exception as e:
+            logger.error(f"Create MobilePunchin error: {str(e)}")
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
@@ -66,7 +63,6 @@ def login_mobile_punchin(request):
                 logger.warning("Login attempt with missing credentials")
                 return JsonResponse({'error': 'Both identifier and password are required'}, status=400)
 
-            # Try to find user by username or email
             try:
                 user = MobilePunchin.objects.get(username=identifier)
             except MobilePunchin.DoesNotExist:
@@ -76,9 +72,7 @@ def login_mobile_punchin(request):
                     logger.warning(f"Login failed: No user found with identifier {identifier}")
                     return JsonResponse({'error': 'Invalid username or email'}, status=401)
 
-            # Verify password
             if user.check_password(password):
-                # Store user ID in session
                 request.session['user_id'] = user.id
                 request.session.modified = True
                 logger.info(f"User {user.username} logged in successfully")
@@ -86,12 +80,146 @@ def login_mobile_punchin(request):
             else:
                 logger.warning(f"Login failed: Incorrect password for identifier {identifier}")
                 return JsonResponse({'error': 'Invalid password'}, status=401)
-
         except Exception as e:
             logger.error(f"Login error: {str(e)}")
             return JsonResponse({'error': str(e)}, status=500)
-
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 def mainpage(request):
-    return render(request,'mobile_punchin/main.html')
+    user_id = request.session.get('user_id')
+    if not user_id:
+        logger.warning("Unauthorized access to mainpage")
+        return redirect('time_tracker:login_page')
+
+    try:
+        user = MobilePunchin.objects.get(id=user_id)
+    except MobilePunchin.DoesNotExist:
+        logger.error(f"User with ID {user_id} not found")
+        return redirect('time_tracker:login_page')
+
+    is_punched_in = False
+    punch_record = None
+    try:
+        punch_record = PunchRecord.objects.get(user=user)
+        is_punched_in = punch_record.punch_in_time is not None and punch_record.punch_out_time is None
+    except PunchRecord.DoesNotExist:
+        pass
+    branches = Branches.objects.all()
+    context = {
+        'user': user,
+        'is_punched_in': is_punched_in,
+        'punch_record': punch_record,
+        'current_date': timezone.localtime(timezone.now()).date().isoformat(),
+        'branches': branches,
+    }
+    return render(request, 'mobile_punchin/main.html', context)
+
+@csrf_exempt
+def punch_in(request):
+    if request.method == 'POST':
+        try:
+            user_id = request.session.get('user_id')
+            if not user_id:
+                logger.error("Punch-in attempted without user_id in session")
+                return JsonResponse({'error': 'User not authenticated'}, status=401)
+
+            try:
+                user = MobilePunchin.objects.get(id=user_id)
+            except MobilePunchin.DoesNotExist:
+                logger.error(f"User with ID {user_id} not found")
+                return JsonResponse({'error': 'User not found'}, status=404)
+
+            branch_id = request.POST.get('branch_id')
+            if not branch_id:
+                logger.warning(f"Punch-in attempted without branch_id for user {user.username}")
+                return JsonResponse({'error': 'Branch selection required'}, status=400)
+
+            try:
+                branch = Branches.objects.get(id=branch_id)
+            except Branches.DoesNotExist:
+                logger.error(f"Branch with ID {branch_id} not found")
+                return JsonResponse({'error': 'Invalid branch selected'}, status=400)
+
+            today = timezone.localtime(timezone.now()).date()
+            try:
+                punch_record = PunchRecord.objects.get(user=user, date=today)
+                if punch_record.punch_in_time:
+                    logger.warning(f"User {user.username} already punched in today")
+                    return JsonResponse({'error': 'Already punched in today'}, status=400)
+            except PunchRecord.DoesNotExist:
+                punch_record = PunchRecord(user=user, date=today)
+
+            punch_record.punch_in_time = timezone.localtime(timezone.now())
+            punch_record.punch_in_branch = branch
+            punch_record.punch_out_time = None
+            punch_record.punch_out_branch = None
+            punch_record.save()
+            logger.info(f"User {user.username} punched in at {punch_record.punch_in_time} at branch {branch.name} on {punch_record.date}")
+            return JsonResponse({
+                'punch_in_time': punch_record.punch_in_time.isoformat(),
+                'current_date': today.isoformat(),
+                'punch_in_branch_name': branch.name
+            })
+        except Exception as e:
+            logger.error(f"Punch-in error: {str(e)}")
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def punch_out(request):
+    if request.method == 'POST':
+        try:
+            user_id = request.session.get('user_id')
+            if not user_id:
+                logger.error("Punch-out attempted without user_id in session")
+                return JsonResponse({'error': 'User not authenticated'}, status=401)
+
+            try:
+                user = MobilePunchin.objects.get(id=user_id)
+            except MobilePunchin.DoesNotExist:
+                logger.error(f"User with ID {user_id} not found")
+                return JsonResponse({'error': 'User not found'}, status=404)
+
+            branch_id = request.POST.get('branch_id')
+            if not branch_id:
+                logger.warning(f"Punch-out attempted without branch_id for user {user.username}")
+                return JsonResponse({'error': 'Branch selection required'}, status=400)
+
+            try:
+                branch = Branches.objects.get(id=branch_id)
+            except Branches.DoesNotExist:
+                logger.error(f"Branch with ID {branch_id} not found")
+                return JsonResponse({'error': 'Invalid branch selected'}, status=400)
+
+            today = timezone.localtime(timezone.now()).date()
+            try:
+                punch_record = PunchRecord.objects.get(user=user, date=today)
+                if not punch_record.punch_in_time or punch_record.punch_out_time:
+                    logger.warning(f"User {user.username} has no active punch-in on {today}")
+                    return JsonResponse({'error': 'No active punch-in record'}, status=400)
+
+                punch_record.punch_out_time = timezone.localtime(timezone.now())
+                punch_record.punch_out_branch = branch
+                punch_record.save()
+                logger.info(f"User {user.username} punched out at {punch_record.punch_out_time} at branch {branch.name} on {punch_record.date}")
+                return JsonResponse({
+                    'punch_out_time': punch_record.punch_out_time.isoformat(),
+                    'current_date': today.isoformat(),
+                    'punch_out_branch_name': branch.name
+                })
+            except PunchRecord.DoesNotExist:
+                logger.warning(f"No punch record found for user {user.username} on {today}")
+                return JsonResponse({'error': 'No punch-in record found'}, status=400)
+        except Exception as e:
+            logger.error(f"Punch-out error: {str(e)}")
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def logout_view(request):
+    request.session.flush()
+    logger.info("User logged out")
+    return redirect('login_page')
+
+def list_punch_records(request):
+    punch_records = PunchRecord.objects.select_related('user').all().order_by('-date', '-punch_in_time')
+    return render(request, 'mobile_punchin/punch_records_list.html', {'punch_records': punch_records})

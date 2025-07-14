@@ -1,0 +1,103 @@
+{% load static %}
+<div class="card">
+    <div class="card-header bg-light">
+        <h5 class="card-title mb-0" style="color: var(--primary-color);">Mobile Attendance Records</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" class="form-control" id="usernameSearch" placeholder="Search by Username">
+            </div>
+            <div class="col-md-4">
+                <input type="date" class="form-control" id="startDate" placeholder="Start Date">
+            </div>
+            <div class="col-md-4">
+                <input type="date" class="form-control" id="endDate" placeholder="End Date">
+            </div>
+        </div>
+        {% if punch_records %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Username</th>
+                        <th>Date</th>
+                        <th>Punch In</th>
+                        <th>Punch In Branch</th>
+                        <th>Punch Out</th>
+                        <th>Punch Out Branch</th>
+                    </tr>
+                </thead>
+                <tbody id="punchRecordsTableBody">
+                    {% for record in punch_records %}
+                    <tr data-username="{{ record.user.username|lower }}"
+                        data-date="{{ record.date|date:'Y-m-d' }}">
+                        <td class="serial-number">{{ forloop.counter }}</td>
+                        <td>{{ record.user.username }}</td>
+                        <td>{{ record.date|date:"Y-m-d" }}</td>
+                        <td>{{ record.punch_in_time|date:"H:i:s" }}</td>
+                        <td>{{ record.punch_in_branch.name }}</td>
+                        <td>{{ record.punch_out_time|date:"H:i:s"|default:"-" }}</td>
+                        <td>{{ record.punch_out_branch.name|default:"-" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center text-muted">No punch records found.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        let currentPage = 1;
+        const rowsPerPage = 25;
+
+        function filterRecords() {
+            const usernameInput = $('#usernameSearch').val().toLowerCase();
+            const startDate = $('#startDate').val();
+            const endDate = $('#endDate').val();
+
+            $('#punchRecordsTableBody tr').each(function() {
+                const $row = $(this);
+                const username = $row.data('username') || '';
+                const date = $row.data('date') || '';
+
+                const matchesUsername = !usernameInput || username.includes(usernameInput);
+                let matchesDate = true;
+
+                if (startDate && date < startDate) matchesDate = false;
+                if (endDate && date > endDate) matchesDate = false;
+
+                const matches = matchesUsername && matchesDate;
+                $row.data('matches', matches);
+                $row.toggle(matches);
+            });
+
+            updateSerialNumbers();
+        }
+
+        function updateSerialNumbers() {
+            let visibleCount = 0;
+            $('#punchRecordsTableBody tr').each(function() {
+                const $row = $(this);
+                if ($row.data('matches') !== false && $row.is(':visible')) {
+                    visibleCount++;
+                    $row.find('.serial-number').text(visibleCount);
+                }
+            });
+        }
+
+        let filterTimeout;
+        $('#usernameSearch, #startDate, #endDate').on('input change', function() {
+            clearTimeout(filterTimeout);
+            filterTimeout = setTimeout(filterRecords, 300);
+        });
+
+        // Initial serial number update
+        updateSerialNumbers();
+    });
+</script>

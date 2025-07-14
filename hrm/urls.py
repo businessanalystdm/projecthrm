@@ -119,6 +119,10 @@ urlpatterns = [
     path('punch-login/', mobile_punchin_views.login_page, name='login_page'),
     path('api/login/', mobile_punchin_views.login_mobile_punchin, name='login_mobile_punchin'),
     path('main/', mobile_punchin_views.mainpage, name='mainpage'),
+    path('api/punch-in/', mobile_punchin_views.punch_in, name='punch_in'),
+    path('api/punch-out/', mobile_punchin_views.punch_out, name='punch_out'),
+    path('logout/', mobile_punchin_views.logout_view, name='logout'),
+    path('list-punch-records/', mobile_punchin_views.list_punch_records, name='list_punch_records'),
 
 ]
 
