@@ -635,7 +635,7 @@ def delete_zone(request, id):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
 
-
+# a
 # Branch Management Views
 @login_required(login_url='signin')
 def branches_list(request):
