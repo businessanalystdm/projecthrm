@@ -604,7 +604,7 @@ def zone_list(request):
 
 @csrf_exempt
 @login_required(login_url='signin')
-@user_passes_test(is_superuser, login_url='signin', redirect_field_name='redirect_to')
+# @user_passes_test(is_superuser, login_url='signin', redirect_field_name='redirect_to')
 def add_zone(request):
     if request.method == 'POST':
         name = request.POST.get('name')
