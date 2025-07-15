@@ -40,7 +40,7 @@ class PunchRecord(models.Model):
     )
     date = models.DateField(default=timezone.now)
     punch_in_time = models.DateTimeField(null=True, blank=True)
-    punch_in_branch=models.ForeignKey(Branches, on_delete=models.CASCADE, related_name='punch_in_branches')
+    punch_in_branch=models.ForeignKey(Branches, on_delete=models.CASCADE, related_name='punch_in_branches',null=True, blank=True)
     punch_out_time = models.DateTimeField(null=True, blank=True)
     punch_out_branch=models.ForeignKey(Branches, on_delete=models.CASCADE, related_name='punch_out_branches',null=True, blank=True)
 

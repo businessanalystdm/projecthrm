@@ -14,6 +14,8 @@
             --red-dark: #b91c1c;
             --bg: #f3f4f6;
             --white: #ffffff;
+            --blue: #2563eb;
+            --blue-dark: #1e40af;
         }
 
         body {
@@ -90,6 +92,14 @@
             background-color: var(--red-dark);
         }
 
+        .button.blue {
+            background-color: var(--blue);
+        }
+
+        .button.blue:hover:not(:disabled) {
+            background-color: var(--blue-dark);
+        }
+
         .button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
@@ -99,18 +109,6 @@
             font-size: 1rem;
             color: #444;
             margin-top: 1rem;
-        }
-
-        .logout {
-            display: inline-block;
-            margin-top: 1rem;
-            font-size: 0.9rem;
-            color: #2563eb;
-            text-decoration: none;
-        }
-
-        .logout:hover {
-            text-decoration: underline;
         }
 
         .form-select {
@@ -147,13 +145,13 @@
         <div id="timer">00:00:00</div>
 
         <div class="buttons">
-            <select id="punchInBranch" class="form-select" {% if punch_record %}disabled{% endif %}>
+            <select id="punchInBranch" class="form-select" {% if is_punched_in or is_punched_out %}disabled{% endif %}>
                 <option value="">Select Punch-In Branch</option>
                 {% for branch in branches %}
                 <option value="{{ branch.id }}">{{ branch.name }}</option>
                 {% endfor %}
             </select>
-            <button id="punchIn" class="button green" {% if punch_record %}disabled{% endif %}>Punch In</button>
+            <button id="punchIn" class="button green" {% if is_punched_in or is_punched_out %}disabled{% endif %}>Punch In</button>
             <select id="punchOutBranch" class="form-select" {% if not is_punched_in %}disabled{% endif %}>
                 <option value="">Select Punch-Out Branch</option>
                 {% for branch in branches %}
@@ -161,22 +159,25 @@
                 {% endfor %}
             </select>
             <button id="punchOut" class="button red" {% if not is_punched_in %}disabled{% endif %}>Punch Out</button>
+            <form id="logoutForm" action="{% url 'logout' %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" id="logout" class="">Log Out</button>
+            </form>
         </div>
 
         <div id="status" class="status">
             {% if is_punched_in %}
                 Punched in at: {{ punch_record.punch_in_time|date:"H:i:s" }} (Branch: {{ punch_record.punch_in_branch.name }})
-            {% elif punch_record and punch_record.punch_out_time %}
+            {% elif is_punched_out %}
                 Punched out at: {{ punch_record.punch_out_time|date:"H:i:s" }} (Branch: {{ punch_record.punch_out_branch.name }})
             {% endif %}
         </div>
-
-        <a href="{% url 'logout' %}" class="logout">Log Out</a>
     </div>
 
     <script>
         let startTime = {% if is_punched_in %}new Date('{{ punch_record.punch_in_time.isoformat }}').getTime(){% else %}null{% endif %};
         let timerInterval = null;
+        let lastDate = '{{ current_date }}';
 
         const timerDisplay = document.getElementById('timer');
         const currentTimeDisplay = document.getElementById('currentTime');
@@ -184,6 +185,7 @@
         const punchOutButton = document.getElementById('punchOut');
         const punchInBranch = document.getElementById('punchInBranch');
         const punchOutBranch = document.getElementById('punchOutBranch');
+        const logoutForm = document.getElementById('logoutForm');
         const statusDisplay = document.getElementById('status');
 
         // Function to update the live current time in IST
@@ -192,10 +194,17 @@
             const options = { timeZone: 'Asia/Kolkata', hour12: false };
             const timeString = now.toLocaleTimeString('en-US', options);
             currentTimeDisplay.textContent = timeString;
+
+            // Check if the date has changed
+            const currentDate = now.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+            if (currentDate !== lastDate) {
+                window.location.reload();
+            }
         }
 
         // Function to update the punch-in timer
         function updateTimer() {
+            if (!startTime) return;
             const now = new Date().getTime();
             const elapsed = now - startTime;
             const hours = Math.floor(elapsed / 3600000).toString().padStart(2, '0');
@@ -236,7 +245,7 @@
                     punchOutButton.disabled = false;
                     punchOutBranch.disabled = false;
                     const punchInTime = new Date(data.punch_in_time).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true });
-                    statusDisplay.textContent = `Punched in at: ${punchInTime} (Branch: ${data.punch_in_name})`;
+                    statusDisplay.textContent = `Punched in at: ${punchInTime} (Branch: ${data.punch_in_branch_name})`;
                     alert(`Successfully punched in at ${punchInTime}`);
                 } else {
                     statusDisplay.textContent = data.error || 'Punch-in failed';
@@ -271,8 +280,9 @@
                     punchInButton.disabled = true;
                     punchInBranch.disabled = true;
                     const punchOutTime = new Date(data.punch_out_time).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true });
-                    statusDisplay.textContent = `Punched out at: ${punchOutTime} (Branch: ${data.punch_out_name})`;
+                    statusDisplay.textContent = `Punched out at: ${punchOutTime} (Branch: ${data.punch_out_branch_name})`;
                     startTime = null;
+                    alert(`Successfully punched out at ${punchOutTime}`);
                 } else {
                     statusDisplay.textContent = data.error || 'Punch-out failed';
                     console.error('Punch-out error:', data.error);
@@ -280,6 +290,34 @@
             } catch (error) {
                 statusDisplay.textContent = 'An error occurred. Please try again.';
                 console.error('Punch-out fetch error:', error);
+            }
+        });
+
+        // Logout function
+        logoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (confirm('Are you sure you want to log out?')) {
+                try {
+                    const response = await fetch('{% url 'logout' %}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: ''
+                    });
+                    const data = await response.json();
+                    console.log('Logout response:', data);
+                    if (response.ok) {
+                        window.location.href = '{% url 'login_page' %}';
+                    } else {
+                        statusDisplay.textContent = data.error || 'Logout failed';
+                        console.error('Logout error:', data.error);
+                    }
+                } catch (error) {
+                    statusDisplay.textContent = 'An error occurred during logout. Please try again.';
+                    console.error('Logout fetch error:', error);
+                }
             }
         });
     </script>

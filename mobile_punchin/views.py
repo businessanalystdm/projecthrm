@@ -4,7 +4,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from .models import MobilePunchin, PunchRecord
 from hr.models import Branches
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -97,19 +96,18 @@ def mainpage(request):
         logger.error(f"User with ID {user_id} not found")
         return redirect('time_tracker:login_page')
 
-    is_punched_in = False
-    punch_record = None
-    try:
-        punch_record = PunchRecord.objects.get(user=user)
-        is_punched_in = punch_record.punch_in_time is not None and punch_record.punch_out_time is None
-    except PunchRecord.DoesNotExist:
-        pass
+    today = timezone.localtime(timezone.now()).date()
+    punch_record, created = PunchRecord.objects.get_or_create(user=user, date=today)
+
+    is_punched_in = punch_record.punch_in_time is not None and punch_record.punch_out_time is None
+    is_punched_out = punch_record.punch_out_time is not None
     branches = Branches.objects.all()
     context = {
         'user': user,
         'is_punched_in': is_punched_in,
+        'is_punched_out': is_punched_out,
         'punch_record': punch_record,
-        'current_date': timezone.localtime(timezone.now()).date().isoformat(),
+        'current_date': today.isoformat(),
         'branches': branches,
     }
     return render(request, 'mobile_punchin/main.html', context)
@@ -141,18 +139,14 @@ def punch_in(request):
                 return JsonResponse({'error': 'Invalid branch selected'}, status=400)
 
             today = timezone.localtime(timezone.now()).date()
-            try:
-                punch_record = PunchRecord.objects.get(user=user, date=today)
-                if punch_record.punch_in_time:
-                    logger.warning(f"User {user.username} already punched in today")
-                    return JsonResponse({'error': 'Already punched in today'}, status=400)
-            except PunchRecord.DoesNotExist:
-                punch_record = PunchRecord(user=user, date=today)
+            punch_record, created = PunchRecord.objects.get_or_create(user=user, date=today)
+
+            if punch_record.punch_in_time:
+                logger.warning(f"User {user.username} already punched in today")
+                return JsonResponse({'error': 'Already punched in today'}, status=400)
 
             punch_record.punch_in_time = timezone.localtime(timezone.now())
             punch_record.punch_in_branch = branch
-            punch_record.punch_out_time = None
-            punch_record.punch_out_branch = None
             punch_record.save()
             logger.info(f"User {user.username} punched in at {punch_record.punch_in_time} at branch {branch.name} on {punch_record.date}")
             return JsonResponse({
@@ -215,10 +209,14 @@ def punch_out(request):
             return JsonResponse({'error': str(e)}, status=500)
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
+@csrf_exempt
 def logout_view(request):
-    request.session.flush()
-    logger.info("User logged out")
-    return redirect('login_page')
+    if request.method == 'POST':
+        user_id = request.session.get('user_id')
+        logger.info(f"User {user_id} logged out")
+        request.session.flush()
+        return JsonResponse({'message': 'Logged out successfully'}, status=200)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 def list_punch_records(request):
     punch_records = PunchRecord.objects.select_related('user').all().order_by('-date', '-punch_in_time')
