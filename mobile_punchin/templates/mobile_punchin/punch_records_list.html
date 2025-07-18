@@ -27,12 +27,15 @@
                         <th>Punch In Branch</th>
                         <th>Punch Out</th>
                         <th>Punch Out Branch</th>
+                        <th>Work Duration</th>
                     </tr>
                 </thead>
                 <tbody id="punchRecordsTableBody">
                     {% for record in punch_records %}
                     <tr data-username="{{ record.user.username|lower }}"
-                        data-date="{{ record.date|date:'Y-m-d' }}">
+                        data-date="{{ record.date|date:'Y-m-d' }}"
+                        data-punch-in="{{ record.punch_in_time|date:'H:i:s' }}"
+                        data-punch-out="{{ record.punch_out_time|date:'H:i:s'|default:'-' }}">
                         <td class="serial-number">{{ forloop.counter }}</td>
                         <td>{{ record.user.username }}</td>
                         <td>{{ record.date|date:"Y-m-d" }}</td>
@@ -40,6 +43,7 @@
                         <td>{{ record.punch_in_branch.name }}</td>
                         <td>{{ record.punch_out_time|date:"H:i:s"|default:"-" }}</td>
                         <td>{{ record.punch_out_branch.name|default:"-" }}</td>
+                        <td class="work-duration">-</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -55,6 +59,45 @@
     $(document).ready(function() {
         let currentPage = 1;
         const rowsPerPage = 25;
+
+        function calculateDuration(punchIn, punchOut) {
+            if (punchIn === '-' || punchOut === '-' || !punchIn || !punchOut) {
+                return '-';
+            }
+
+            // Parse time strings (HH:mm:ss) to Date objects for the same day
+            const [inHours, inMinutes, inSeconds] = punchIn.split(':').map(Number);
+            const [outHours, outMinutes, outSeconds] = punchOut.split(':').map(Number);
+
+            const punchInTime = new Date(2000, 0, 1, inHours, inMinutes, inSeconds);
+            const punchOutTime = new Date(2000, 0, 1, outHours, outMinutes, outSeconds);
+
+            // Calculate difference in milliseconds
+            let diffMs = punchOutTime - punchInTime;
+            if (diffMs < 0) {
+                // If punch out is before punch in, assume next day
+                diffMs += 24 * 60 * 60 * 1000;
+            }
+
+            // Convert to hours, minutes, seconds
+            const hours = Math.floor(diffMs / (1000 * 60 * 60));
+            diffMs -= hours * 1000 * 60 * 60;
+            const minutes = Math.floor(diffMs / (1000 * 60));
+            diffMs -= minutes * 1000 * 60;
+            const seconds = Math.floor(diffMs / 1000);
+
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateWorkDurations() {
+            $('#punchRecordsTableBody tr').each(function() {
+                const $row = $(this);
+                const punchIn = $row.data('punch-in');
+                const punchOut = $row.data('punch-out');
+                const duration = calculateDuration(punchIn, punchOut);
+                $row.find('.work-duration').text(duration);
+            });
+        }
 
         function filterRecords() {
             const usernameInput = $('#usernameSearch').val().toLowerCase();
@@ -78,6 +121,7 @@
             });
 
             updateSerialNumbers();
+            updateWorkDurations();
         }
 
         function updateSerialNumbers() {
@@ -97,7 +141,8 @@
             filterTimeout = setTimeout(filterRecords, 300);
         });
 
-        // Initial serial number update
+        // Initial updates
         updateSerialNumbers();
+        updateWorkDurations();
     });
 </script>

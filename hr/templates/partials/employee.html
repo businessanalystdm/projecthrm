@@ -1,6 +1,7 @@
 {% load static %}
 <!-- Employee Modal -->
-<div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true" data-bs-backdrop="static">
+<div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true"
+     data-bs-backdrop="static">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <form id="employeeForm" method="POST" enctype="multipart/form-data">
@@ -23,7 +24,9 @@
                                 <!-- Employee ID (emp_id_branch) -->
                                 <div class="col-md-6">
                                     <label for="emp_id_branch">Employee ID <span style="color: red;">*</span></label>
-                                    <input type="text" class="form-control" name="emp_id_branch" id="emp_id_branch" pattern="[0-9]{7}" maxlength="7" required placeholder="7-digit ID (e.g., 1234567)">
+                                    <input type="text" class="form-control" name="emp_id_branch" id="emp_id_branch"
+                                           pattern="[0-9]{7}" maxlength="7" required
+                                           placeholder="7-digit ID (e.g., 1234567)">
                                     <div class="invalid-feedback">Employee ID must be exactly 7 digits.</div>
                                 </div>
                                 <!-- First Name -->
@@ -39,13 +42,17 @@
                                 <!-- Aadhar Number -->
                                 <div class="col-md-6">
                                     <label>Aadhar Number <span style="color: red;">*</span></label>
-                                    <input type="text" class="form-control" name="emp_aadhar_number" id="emp_aadhar_number" pattern="[0-9]{12}" maxlength="12" placeholder="123456789012">
+                                    <input type="text" class="form-control" name="emp_aadhar_number"
+                                           id="emp_aadhar_number" pattern="[0-9]{12}" maxlength="12"
+                                           placeholder="123456789012">
                                 </div>
                                 <!-- Photo -->
                                 <div class="col-md-6">
                                     <label for="emp_photo">Photo</label>
-                                    <input type="file" class="form-control" id="emp_photo" name="emp_photo" accept="image/*">
-                                    <img id="photoPreview" src="#" alt="Image Preview" style="display: none; width: 100px; height: auto; margin-top: 10px;"/>
+                                    <input type="file" class="form-control" id="emp_photo" name="emp_photo"
+                                           accept="image/*">
+                                    <img id="photoPreview" src="#" alt="Image Preview"
+                                         style="display: none; width: 100px; height: auto; margin-top: 10px;"/>
                                 </div>
                                 <!-- Date of Birth -->
                                 <div class="col-md-6">
@@ -55,12 +62,14 @@
                                 <!-- Mobile -->
                                 <div class="col-md-6">
                                     <label>Mobile <span style="color: red;">*</span></label>
-                                    <input type="text" class="form-control" name="emp_mobile" pattern="\+?\d{10,15}" required>
+                                    <input type="text" class="form-control" name="emp_mobile" pattern="\+?\d{10,15}"
+                                           required>
                                 </div>
                                 <!-- Secondary Mobile -->
                                 <div class="col-md-6">
                                     <label>Secondary Mobile</label>
-                                    <input type="text" class="form-control" name="emp_second_mobile" pattern="\+?\d{10,15}">
+                                    <input type="text" class="form-control" name="emp_second_mobile"
+                                           pattern="\+?\d{10,15}">
                                 </div>
                                 <!-- Email -->
                                 <div class="col-md-6">
@@ -97,7 +106,8 @@
                                     <select class="form-select" name="emp_qualification" required>
                                         <option value="" disabled selected>-- Qualification --</option>
                                         {% for qualification in qualifications|dictsort:"qualification_name" %}
-                                        <option value="{{ qualification.id }}">{{ qualification.qualification_name }}</option>
+                                        <option value="{{ qualification.id }}">{{ qualification.qualification_name }}
+                                        </option>
                                         {% endfor %}
                                     </select>
                                 </div>
@@ -109,8 +119,10 @@
                                 <!-- Documents -->
                                 <div class="col-md-6">
                                     <label for="emp_documents">Documents</label>
-                                    <input type="file" class="form-control" id="emp_documents" name="emp_documents" accept=".pdf,.doc,.docx">
-                                    <a id="documentPreview" href="#" target="_blank" style="display: none; margin-top: 10px;">View Document</a>
+                                    <input type="file" class="form-control" id="emp_documents" name="emp_documents"
+                                           accept=".pdf,.doc,.docx">
+                                    <a id="documentPreview" href="#" target="_blank"
+                                       style="display: none; margin-top: 10px;">View Document</a>
                                 </div>
                             </div>
                         </fieldset>
@@ -150,7 +162,8 @@
                                 <!-- Sub-Department -->
                                 <div class="col-md-6">
                                     <label>Sub-Department <span style="color: red;">*</span></label>
-                                    <select class="form-select" name="emp_sub_department" id="emp_sub_department" required>
+                                    <select class="form-select" name="emp_sub_department" id="emp_sub_department"
+                                            required>
                                         <option value="" disabled selected>-- Select Sub-Department --</option>
                                     </select>
                                 </div>
@@ -179,15 +192,15 @@
                                     <input type="date" class="form-control" name="emp_joining_date" required>
                                 </div>
                                 <!-- Resigning Date -->
-                                <div class="col-md-6">
-                                    <label>Resigning Date</label>
-                                    <input type="date" class="form-control" name="emp_resigning_date">
-                                </div>
-                                <!-- Resigning Reason -->
-                                <div class="col-md-6">
-                                    <label>Resigning Reason</label>
-                                    <textarea class="form-control" name="emp_resigning_reason" rows="2"></textarea>
-                                </div>
+                                <!--                                <div class="col-md-6">-->
+                                <!--                                    <label>Resigning Date</label>-->
+                                <!--                                    <input type="date" class="form-control" name="emp_resigning_date">-->
+                                <!--                                </div>-->
+                                <!--                                &lt;!&ndash; Resigning Reason &ndash;&gt;-->
+                                <!--                                <div class="col-md-6">-->
+                                <!--                                    <label>Resigning Reason</label>-->
+                                <!--                                    <textarea class="form-control" name="emp_resigning_reason" rows="2"></textarea>-->
+                                <!--                                </div>-->
                                 <!-- Work Start Time -->
                                 <div class="col-md-6">
                                     <label>Work Start Time <span style="color: red;">*</span></label>
@@ -201,7 +214,8 @@
                                 <!-- Extra Skills -->
                                 <div class="col-md-6">
                                     <label for="emp_extra_skills">Extra Skills</label>
-                                    <input type="text" class="form-control" name="emp_extra_skills" id="emp_extra_skills" placeholder="Type skills (e.g., Python, Java)">
+                                    <input type="text" class="form-control" name="emp_extra_skills"
+                                           id="emp_extra_skills" placeholder="Type skills (e.g., Python, Java)">
                                 </div>
                                 <!-- Status -->
                                 <div class="col-md-6">
@@ -216,15 +230,20 @@
                                 <div class="col-md-6 mt-3">
                                     <label for="emp_assets_dropdown" class="form-label">Select Asset to Assign</label>
                                     <div class="narrow-field d-flex align-items-center">
-                                        <select class="form-select me-2" id="emp_assets_dropdown" name="emp_assets_dropdown">
+                                        <select class="form-select me-2" id="emp_assets_dropdown"
+                                                name="emp_assets_dropdown">
                                             <option value="" selected disabled>Choose an asset...</option>
                                             {% for asset in assets|dictsort:"name" %}
                                             <option value="{{ asset.id }}">{{ asset.name }}</option>
                                             {% endfor %}
                                         </select>
-                                        <button type="button" class="btn btn-primary btn-sm" id="assign_asset_button">Submit</button>
+                                        <button type="button" class="btn btn-primary btn-sm" id="assign_asset_button">
+                                            Submit
+                                        </button>
                                     </div>
-                                    <button type="button" class="btn btn-primary btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#assetsModal">Manage Assets</button>
+                                    <button type="button" class="btn btn-primary btn-sm mt-2" data-bs-toggle="modal"
+                                            data-bs-target="#assetsModal">Manage Assets
+                                    </button>
                                 </div>
                                 <!-- Assigned Assets -->
                                 <div class="col-md-6 mt-3">
@@ -250,11 +269,13 @@ System: list" class="list-group assigned-assets-list"></ul>
                                 <div class="experience-entry row g-3 mb-3" data-index="0">
                                     <div class="col-md-6">
                                         <label>Company Name</label>
-                                        <input type="text" class="form-control exp-company-name" data-field="company_name">
+                                        <input type="text" class="form-control exp-company-name"
+                                               data-field="company_name">
                                     </div>
                                     <div class="col-md-6">
                                         <label>Designation</label>
-                                        <input type="text" class="form-control exp-designation" data-field="designation">
+                                        <input type="text" class="form-control exp-designation"
+                                               data-field="designation">
                                     </div>
                                     <div class="col-md-6">
                                         <label>Start Date</label>
@@ -265,11 +286,13 @@ System: list" class="list-group assigned-assets-list"></ul>
                                         <input type="date" class="form-control exp-end-date" data-field="end_date">
                                     </div>
                                     <div class="col-md-1 d-flex align-items-end">
-                                        <button type="button" class="btn btn-danger btn-sm remove-experience">Remove</button>
+                                        <button type="button" class="btn btn-danger btn-sm remove-experience">Remove
+                                        </button>
                                     </div>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-secondary mt-2" id="add-company">Add Experience</button>
+                            <button type="button" class="btn btn-secondary mt-2" id="add-company">Add Experience
+                            </button>
                         </fieldset>
                     </div>
                 </div>
@@ -277,7 +300,9 @@ System: list" class="list-group assigned-assets-list"></ul>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Save</button>
                     <button type="reset" class="btn btn-secondary"><i class="bi bi-arrow-clockwise"></i> Reset</button>
-                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Cancel</button>
+                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i>
+                        Cancel
+                    </button>
                 </div>
             </form>
         </div>
@@ -451,86 +476,105 @@ System: list" class="list-group assigned-assets-list"></ul>
         }
     });
 
-    // Form Submission
     document.getElementById('employeeForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+    event.preventDefault();
 
-        // Validate dates
-        const dob = document.querySelector('input[name="emp_dob"]').value;
-        const joiningDate = document.querySelector('input[name="emp_joining_date"]').value;
-        const resigningDate = document.querySelector('input[name="emp_resigning_date"]').value;
+    // Validate dates
+    const dob = document.querySelector('input[name="emp_dob"]').value;
+    const joiningDate = document.querySelector('input[name="emp_joining_date"]').value;
+    const resigningDateInput = document.querySelector('input[name="emp_resigning_date"]');
+    const resigningDate = resigningDateInput ? resigningDateInput.value : null;
 
-        if (!dob || !joiningDate) {
-            alert('Date of Birth and Joining Date are required.');
-            return;
-        }
-
-        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-        if (dob && !dateRegex.test(dob)) {
-            alert('Date of Birth must be in YYYY-MM-DD format.');
-            return;
-        }
-        if (joiningDate && !dateRegex.test(joiningDate)) {
-            alert('Joining Date must be in YYYY-MM-DD format.');
-            return;
-        }
-        if (resigningDate && !dateRegex.test(resigningDate)) {
-            alert('Resigning Date must be in YYYY-MM-DD format.');
-            return;
-        }
-
-        const formData = new FormData(this);
-
-        // Collect experience data
-        const experiences = [];
-        document.querySelectorAll('.experience-entry').forEach(function(entry) {
-            const experience = {
-                company_name: entry.querySelector('.exp-company-name').value || '',
-                designation: entry.querySelector('.exp-designation').value || '',
-                start_date: entry.querySelector('.exp-start-date').value || null,
-                end_date: entry.querySelector('.exp-end-date').value || null
-            };
-            if (experience.company_name || experience.designation || experience.start_date || experience.end_date) {
-                experiences.push(experience);
-            }
-        });
-        document.getElementById('emp_experiences').value = JSON.stringify(experiences);
-        formData.set('emp_experiences', JSON.stringify(experiences));
-
-        // Collect skills as JSON
-        const skills = tagify.value.map(function(tag) { return tag.value; });
-        formData.set('emp_extra_skills', JSON.stringify(skills));
-
-        // Add assigned assets for new employees
-        if (!document.getElementById('employee_id').value) {
-            document.getElementById('assigned_assets').value = JSON.stringify(assignedAssetIds);
-            formData.set('assigned_assets', JSON.stringify(assignedAssetIds));
-        }
-
-        fetch('{% url "add_employee" %}', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Add employee response:', data);
-            if (data.success) {
-                document.getElementById('employeeModal').classList.remove('show');
-                document.getElementById('employeeModal').style.display = 'none';
-                document.querySelector('.modal-backdrop').remove();
-                location.reload();
-            } else {
-                alert('Error saving employee data: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Add employee error:', error);
-            alert('There was an issue submitting the form. Please try again.');
-        });
+    console.log('Form Submission Data:', {
+        dob,
+        joiningDate,
+        resigningDate,
+        employee_id: document.getElementById('employee_id').value,
+        assigned_assets: document.getElementById('assigned_assets').value,
+        emp_experiences: document.getElementById('emp_experiences').value
     });
+
+    if (!dob || !joiningDate) {
+        console.error('Validation failed: Date of Birth and Joining Date are required.');
+        alert('Date of Birth and Joining Date are required.');
+        return;
+    }
+
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (dob && !dateRegex.test(dob)) {
+        console.error('Validation failed: Invalid Date of Birth format.');
+        alert('Date of Birth must be in YYYY-MM-DD format.');
+        return;
+    }
+    if (joiningDate && !dateRegex.test(joiningDate)) {
+        console.error('Validation failed: Invalid Joining Date format.');
+        alert('Joining Date must be in YYYY-MM-DD format.');
+        return;
+    }
+    if (resigningDate && !dateRegex.test(resigningDate)) {
+        console.error('Validation failed: Invalid Resigning Date format.');
+        alert('Resigning Date must be in YYYY-MM-DD format.');
+        return;
+    }
+
+    const formData = new FormData(this);
+
+    // Collect experience data
+    const experiences = [];
+    document.querySelectorAll('.experience-entry').forEach(function(entry) {
+        const experience = {
+            company_name: entry.querySelector('.exp-company-name').value || '',
+            designation: entry.querySelector('.exp-designation').value || '',
+            start_date: entry.querySelector('.exp-start-date').value || null,
+            end_date: entry.querySelector('.exp-end-date').value || null
+        };
+        if (experience.company_name || experience.designation || experience.start_date || experience.end_date) {
+            experiences.push(experience);
+        }
+    });
+    document.getElementById('emp_experiences').value = JSON.stringify(experiences);
+    formData.set('emp_experiences', JSON.stringify(experiences));
+
+    // Collect skills as JSON
+    const skills = tagify.value.map(function(tag) { return tag.value; });
+    formData.set('emp_extra_skills', JSON.stringify(skills));
+
+    // Add assigned assets for new employees
+    if (!document.getElementById('employee_id').value) {
+        document.getElementById('assigned_assets').value = JSON.stringify(assignedAssetIds);
+        formData.set('assigned_assets', JSON.stringify(assignedAssetIds));
+    }
+
+    console.log('Submitting FormData:', Object.fromEntries(formData));
+
+    fetch('{% url "add_employee" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => {
+        console.log('Response Status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Add employee response:', data);
+        if (data.success) {
+            document.getElementById('employeeModal').classList.remove('show');
+            document.getElementById('employeeModal').style.display = 'none';
+            document.querySelector('.modal-backdrop').remove();
+            location.reload();
+        } else {
+            console.error('Server Error:', data.error);
+            alert('Error saving employee data: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Fetch Error:', error);
+        alert('There was an issue submitting the form: ' + error.message);
+    });
+});
 
     // Photo Preview
     document.getElementById('emp_photo').addEventListener('change', function(event) {
